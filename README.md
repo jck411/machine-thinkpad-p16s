@@ -21,7 +21,14 @@ This repo is the **control plane** for this specific box. Shared configs and pac
 
 ## Quick Start
 
-### Full setup (fresh machine)
+### Fresh machine (from nothing)
+```bash
+# After EndeavourOS install, connect to Wi-Fi, then:
+curl -O https://raw.githubusercontent.com/jck411/machine-thinkpad-p16s/main/bootstrap.sh
+chmod +x bootstrap.sh && ./bootstrap.sh
+```
+
+### Full setup (repos already cloned)
 ```bash
 ./setup.sh
 ```
