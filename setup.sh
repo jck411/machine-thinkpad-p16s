@@ -61,7 +61,11 @@ setup_packages() {
     fi
 
     echo -e "  ${BLUE}Running package sync for host: $HOST_PROFILE${NC}"
-    "$pkg_script" install "$HOST_PROFILE"
+    if [ "$NONINTERACTIVE" = "1" ]; then
+        NONINTERACTIVE=1 "$pkg_script" install "$HOST_PROFILE"
+    else
+        "$pkg_script" install "$HOST_PROFILE"
+    fi
     echo ""
 }
 
@@ -111,6 +115,7 @@ setup_configs() {
 # =========================================================================
 # Step 4: Enable systemd services
 # =========================================================================
+
 setup_services() {
     echo -e "${BOLD}${CYAN}[4/4] Systemd services${NC}"
 
@@ -126,12 +131,16 @@ setup_services() {
         [[ "$service" =~ ^[[:space:]]*# ]] && continue
         [[ -z "${service// }" ]] && continue
 
-        if systemctl is-enabled "$service" &>/dev/null; then
-            echo -e "  ${GREEN}✓${NC} $service (already enabled)"
+        if systemctl list-unit-files | grep -q "^$service"; then
+            if systemctl is-enabled "$service" &>/dev/null; then
+                echo -e "  ${GREEN}✓${NC} $service (already enabled)"
+            else
+                echo -e "  ${BLUE}→${NC} Enabling $service..."
+                sudo systemctl enable "$service"
+                changed=1
+            fi
         else
-            echo -e "  ${BLUE}→${NC} Enabling $service..."
-            sudo systemctl enable "$service"
-            changed=1
+            echo -e "  ${YELLOW}⚠ Skipping $service, not installed${NC}"
         fi
     done < "$services_file"
 
