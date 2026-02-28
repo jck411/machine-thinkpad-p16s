@@ -1,0 +1,42 @@
+# Systemd services to enable on this machine
+# One service per line. Lines starting with # are comments.
+
+# Display manager
+sddm.service
+
+# Networking
+NetworkManager.service
+NetworkManager-dispatcher.service
+NetworkManager-wait-online.service
+
+# Bluetooth
+bluetooth.service
+
+# Audio (pipewire runs as user service — no system enable needed)
+
+# SSH
+sshd.service
+
+# Firewall
+firewalld.service
+
+# Time sync
+systemd-timesyncd.service
+
+# OOM killer (prevents system freeze under memory pressure)
+earlyoom.service
+
+# Power management
+power-profiles-daemon.service
+
+# Local DNS/mDNS
+avahi-daemon.service
+
+# Scheduled tasks
+cronie.service
+
+# Smart card reader
+pcscd.service
+
+# SSD TRIM (weekly timer for NVMe Gen4)
+fstrim.timer
