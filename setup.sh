@@ -197,6 +197,59 @@ setup_services() {
         sudo systemctl daemon-reload
     fi
 
+    # Deploy tmpfiles.d drop-ins (THP, etc.)
+    local tmpfiles_dir="$MACHINE_DIR/system/tmpfiles.d"
+    if [ -d "$tmpfiles_dir" ] && [ "$(ls -A "$tmpfiles_dir" 2>/dev/null)" ]; then
+        echo -e "  ${BLUE}Deploying tmpfiles.d configs...${NC}"
+        sudo mkdir -p /etc/tmpfiles.d
+        for conf in "$tmpfiles_dir"/*.conf; do
+            [ -f "$conf" ] || continue
+            local conf_name
+            conf_name=$(basename "$conf")
+            sudo cp "$conf" "/etc/tmpfiles.d/$conf_name"
+            echo -e "  ${GREEN}✓${NC} $conf_name"
+        done
+        sudo systemd-tmpfiles --create 2>/dev/null || true
+    fi
+
+    # Deploy journald drop-ins
+    local journald_dir="$MACHINE_DIR/system/journald.conf.d"
+    if [ -d "$journald_dir" ] && [ "$(ls -A "$journald_dir" 2>/dev/null)" ]; then
+        echo -e "  ${BLUE}Deploying journald drop-ins...${NC}"
+        sudo mkdir -p /etc/systemd/journald.conf.d
+        for conf in "$journald_dir"/*.conf; do
+            [ -f "$conf" ] || continue
+            local conf_name
+            conf_name=$(basename "$conf")
+            sudo cp "$conf" "/etc/systemd/journald.conf.d/$conf_name"
+            echo -e "  ${GREEN}✓${NC} $conf_name"
+        done
+        sudo systemctl restart systemd-journald
+        echo -e "  ${GREEN}✓${NC} journald restarted"
+    fi
+
+    # Deploy coredump drop-ins
+    local coredump_dir="$MACHINE_DIR/system/coredump.conf.d"
+    if [ -d "$coredump_dir" ] && [ "$(ls -A "$coredump_dir" 2>/dev/null)" ]; then
+        echo -e "  ${BLUE}Deploying coredump drop-ins...${NC}"
+        sudo mkdir -p /etc/systemd/coredump.conf.d
+        for conf in "$coredump_dir"/*.conf; do
+            [ -f "$conf" ] || continue
+            local conf_name
+            conf_name=$(basename "$conf")
+            sudo cp "$conf" "/etc/systemd/coredump.conf.d/$conf_name"
+            echo -e "  ${GREEN}✓${NC} $conf_name"
+        done
+    fi
+
+    # Deploy zram-generator config
+    local zram_conf="$MACHINE_DIR/system/zram-generator.conf"
+    if [ -f "$zram_conf" ]; then
+        echo -e "  ${BLUE}Deploying zram-generator config...${NC}"
+        sudo cp "$zram_conf" /etc/systemd/zram-generator.conf
+        echo -e "  ${GREEN}✓${NC} zram-generator.conf"
+    fi
+
     echo ""
 }
 

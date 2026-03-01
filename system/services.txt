@@ -43,3 +43,6 @@ pcscd.service
 
 # SSD TRIM (weekly timer for NVMe Gen4)
 fstrim.timer
+
+# Clean old pacman package cache (keeps last 3 versions)
+paccache.timer
