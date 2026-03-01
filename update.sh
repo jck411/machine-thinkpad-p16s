@@ -71,7 +71,7 @@ sync_packages() {
 
     # Check if anything is missing
     local declared installed missing
-    declared=$("$pkg_script" status "$HOST_PROFILE" 2>/dev/null | grep -c "✗" || echo 0)
+    declared=$("$pkg_script" status "$HOST_PROFILE" 2>/dev/null | grep -c "✗" || true)
     if [ "$declared" -gt 0 ]; then
         echo -e "  ${YELLOW}Run './packages.sh install $HOST_PROFILE' in dotfiles to install missing${NC}"
     fi
