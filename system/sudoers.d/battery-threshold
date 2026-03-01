@@ -1,0 +1,4 @@
+# Allow jack to write battery charge thresholds without a password prompt.
+# Required for the Waybar battery-settings.sh script to function non-interactively.
+jack ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/class/power_supply/BAT0/charge_control_start_threshold
+jack ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/class/power_supply/BAT0/charge_control_end_threshold

@@ -250,6 +250,23 @@ setup_services() {
         echo -e "  ${GREEN}✓${NC} zram-generator.conf"
     fi
 
+    # Deploy sudoers drop-ins
+    local sudoers_dir="$MACHINE_DIR/system/sudoers.d"
+    if [ -d "$sudoers_dir" ] && [ "$(ls -A "$sudoers_dir" 2>/dev/null)" ]; then
+        echo -e "  ${BLUE}Deploying sudoers drop-ins...${NC}"
+        sudo mkdir -p /etc/sudoers.d
+        for conf in "$sudoers_dir"/*; do
+            [ -f "$conf" ] || continue
+            local conf_name
+            conf_name=$(basename "$conf")
+            sudo cp "$conf" "/etc/sudoers.d/$conf_name"
+            sudo chmod 440 "/etc/sudoers.d/$conf_name"
+            sudo visudo -c -f "/etc/sudoers.d/$conf_name" &>/dev/null && \
+                echo -e "  ${GREEN}✓${NC} $conf_name" || \
+                echo -e "  ${RED}✗ $conf_name (syntax error — not deployed)${NC}"
+        done
+    fi
+
     echo ""
 }
 
