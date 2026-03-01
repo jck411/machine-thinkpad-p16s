@@ -29,6 +29,9 @@ earlyoom.service
 # Power management
 power-profiles-daemon.service
 
+# Battery charge threshold (40–80% to extend battery lifespan)
+battery-threshold.service
+
 # Local DNS/mDNS
 avahi-daemon.service
 

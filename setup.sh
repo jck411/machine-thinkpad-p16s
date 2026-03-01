@@ -168,6 +168,22 @@ setup_services() {
         sudo nmcli general reload 2>/dev/null || true
     fi
 
+    # Deploy logind drop-ins
+    local logind_dir="$MACHINE_DIR/system/logind.conf.d"
+    if [ -d "$logind_dir" ] && [ "$(ls -A "$logind_dir" 2>/dev/null)" ]; then
+        echo -e "  ${BLUE}Deploying logind drop-ins...${NC}"
+        sudo mkdir -p /etc/systemd/logind.conf.d
+        for conf in "$logind_dir"/*.conf; do
+            [ -f "$conf" ] || continue
+            local conf_name
+            conf_name=$(basename "$conf")
+            sudo cp "$conf" "/etc/systemd/logind.conf.d/$conf_name"
+            echo -e "  ${GREEN}✓${NC} $conf_name"
+        done
+        sudo systemctl restart systemd-logind
+        echo -e "  ${GREEN}✓${NC} logind restarted"
+    fi
+
     # Copy custom systemd units if present
     local units_dir="$MACHINE_DIR/system/systemd"
     if [ -d "$units_dir" ] && [ "$(ls -A "$units_dir" 2>/dev/null)" ]; then

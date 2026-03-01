@@ -1,0 +1,25 @@
+[Unit]
+Description=Set battery charge thresholds (40–80%)
+Documentation=https://www.kernel.org/doc/html/latest/power/power_supply_class.html
+After=multi-user.target
+
+[Service]
+Type=oneshot
+# Stop charging at 80%, resume charging when below 40%
+# Order matters: when threshold is unchanged or increasing, set END first.
+# This avoids a transient invalid state where start > end.
+ExecStart=/bin/bash -c '\
+    end=80; start=40; \
+    cur_end=$(cat /sys/class/power_supply/BAT0/charge_control_end_threshold); \
+    cur_start=$(cat /sys/class/power_supply/BAT0/charge_control_start_threshold); \
+    if [[ $end -ge $cur_end ]]; then \
+        echo $end   > /sys/class/power_supply/BAT0/charge_control_end_threshold; \
+        echo $start > /sys/class/power_supply/BAT0/charge_control_start_threshold; \
+    else \
+        echo $start > /sys/class/power_supply/BAT0/charge_control_start_threshold; \
+        echo $end   > /sys/class/power_supply/BAT0/charge_control_end_threshold; \
+    fi'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
