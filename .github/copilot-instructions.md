@@ -97,3 +97,11 @@ Every meaningful change must satisfy:
 
 - Use `#!/bin/bash` and `set -e`
 - Target Arch Linux — use `pacman`/`yay`, not apt or dnf
+- Long-running daemons: do NOT use `set -e` — transient errors will kill the loop
+
+## Hyprland + Waybar Gotchas
+
+- **Waybar `mode: "hide"` does NOT work on Hyprland** — it requires Sway IPC for hover-to-reveal. On Hyprland it just applies a CSS class (`.hidden`) with no mouse interaction. Always looks like a stuck transparent bar.
+- **Correct autohide on Hyprland**: poll `hyprctl cursorpos`, send `SIGUSR1` (show) / `SIGUSR2` (hide) to waybar. Use `start_hidden: true`, `on-sigusr1: "show"`, `on-sigusr2: "hide"` in waybar config. No `mode` key.
+- **`pkill` matches substrings** — `pkill -SIGUSR1 waybar` will also kill `waybar-autohide.sh` because the name contains "waybar". Always use `pkill -x` for exact binary name matching when sending signals.
+- **Research before implementing** — when integrating compositor/bar features, check official docs first to confirm the feature works on Hyprland specifically (not just Sway).
