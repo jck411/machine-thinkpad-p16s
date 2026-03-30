@@ -98,7 +98,7 @@ setup_configs() {
             echo -e "  ${YELLOW}⚠${NC} $component (may already be linked)"
     done
 
-    for file in brave-flags.conf code-flags.conf cursor-flags.conf \
+    for file in brave-flags.conf code-flags.conf \
                 electron-flags.conf power-settings.conf; do
         "$install_script" "$file" 2>/dev/null && \
             echo -e "  ${GREEN}✓${NC} $file" || \
