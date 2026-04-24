@@ -9,6 +9,7 @@ Complete agent and coding guidelines for this repository.
 - Workspace entry point — all repos live under `~/REPOS/`
 - Read each repo's `.github/copilot-instructions.md` before editing it
 - Host profile key: `thinkpad-p16s-gen4`
+- Secrets and credentials live in `secrets/.env` (gitignored) — check there before prompting the user (e.g. `SUDO_PASSWORD` for sudo prompts)
 
 ## Routing
 
