@@ -135,20 +135,25 @@ check_services() {
 # =========================================================================
 system_update() {
     echo -e "${BOLD}${CYAN}=== System Update ===${NC}"
-    echo -e "${YELLOW}This will run pacman -Syu and yay -Sua${NC}"
-    read -p "Continue? [y/N]: " confirm
 
-    if [[ "$confirm" =~ ^[Yy]$ ]]; then
-        echo -e "${BLUE}Updating official repos...${NC}"
-        sudo pacman -Syu
-
-        echo -e "${BLUE}Updating AUR packages...${NC}"
-        yay -Sua
-
-        echo -e "${GREEN}✓ System updated${NC}"
-    else
-        echo -e "${YELLOW}Skipped${NC}"
+    # Prime sudo from stored credentials so it doesn't prompt mid-run
+    local env_file="$MACHINE_DIR/secrets/.env"
+    if [ -f "$env_file" ]; then
+        local sudo_pass
+        sudo_pass=$(grep -oP 'SUDO_PASSWORD=\K.*' "$env_file" 2>/dev/null || true)
+        if [ -n "$sudo_pass" ]; then
+            echo "$sudo_pass" | sudo -S true 2>/dev/null && \
+                echo -e "  ${GREEN}✓${NC} sudo authenticated" || \
+                echo -e "  ${YELLOW}⚠${NC} sudo auth failed — may prompt for password"
+        fi
     fi
+
+    echo -e "  ${BLUE}Updating official + AUR packages...${NC}"
+    yay -Syu --noconfirm --noprovides
+    echo -e "  ${GREEN}✓${NC} Packages updated"
+    echo ""
+
+    echo -e "${GREEN}✓ System updated${NC}"
 }
 
 # =========================================================================
