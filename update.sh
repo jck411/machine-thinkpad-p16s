@@ -149,7 +149,7 @@ system_update() {
     fi
 
     echo -e "  ${BLUE}Updating official + AUR packages...${NC}"
-    yay -Syu --noconfirm --noprovides
+    yay -Syu --noconfirm
     echo -e "  ${GREEN}✓${NC} Packages updated"
     echo ""
 
