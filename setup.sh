@@ -91,7 +91,7 @@ setup_configs() {
 
     # Install each component non-interactively
     for component in hypr waybar foot foot-quake rofi mako gtk-3.0 gtk-4.0 \
-                     Thunar imv mpv networkmanager-dmenu nwg-displays \
+                     Thunar mpv networkmanager-dmenu nwg-displays \
                      xdg-desktop-portal scripts; do
         "$install_script" "$component" 2>/dev/null && \
             echo -e "  ${GREEN}✓${NC} $component" || \
