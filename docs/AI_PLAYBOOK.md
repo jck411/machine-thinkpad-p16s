@@ -33,6 +33,8 @@ Complete agent and coding guidelines for this repository.
 
 ## Install / Update Workflow
 
+> **Always install through the LLM.** Never install packages manually outside this agent — the workflow below ensures package lists, configs, symlinks, and backups all stay in sync.
+
 When asked to install or update any app, follow these steps in order:
 
 1. **Verify the app is real** — search online if unfamiliar; never refuse due to unfamiliarity.

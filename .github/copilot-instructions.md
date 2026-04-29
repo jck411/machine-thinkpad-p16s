@@ -16,6 +16,7 @@ Control plane for a ThinkPad P16s Gen 4 AMD running EndeavourOS (Arch) + Hyprlan
 8. **Maintain a strong `.gitignore`**: never commit secrets, tokens, credentials, or machine-specific files.
 9. **Verify before acting**: if an app or product is unfamiliar, search online first; never refuse due to unfamiliarity.
 10. **Propagate changes** to ALL affected repos—no partial updates.
+11. **All installs go through the LLM**: never install manually outside this agent. Every install must follow the workflow in `docs/AI_PLAYBOOK.md` so package lists, configs, and backups stay in sync.
 
 ## Required Post-Change Checklist
 
