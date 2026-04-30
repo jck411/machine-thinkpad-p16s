@@ -4,7 +4,7 @@ set -e
 # Creates symlinks in every repo pointing to ~/ENV/.env
 # Run this once on a new machine after populating ~/ENV/.env
 
-MASTER="$HOME/ENV/.env"
+MASTER="$HOME/REPOS/symlinked-env/.env"
 REPOS="$HOME/REPOS"
 
 RED='\033[0;31m'
@@ -14,7 +14,7 @@ NC='\033[0m'
 
 if [[ ! -f "$MASTER" ]]; then
     echo -e "${RED}ERROR: $MASTER not found.${NC}"
-    echo "Copy ~/ENV/.env.example to ~/ENV/.env and fill in your secrets first."
+    echo "Copy ~/REPOS/symlinked-env/.env.example to ~/REPOS/symlinked-env/.env and fill in your secrets first."
     exit 1
 fi
 
@@ -28,6 +28,7 @@ TARGETS=(
     "$REPOS/jackshome.com"
     "$REPOS/opencode-config"
     "$REPOS/knowledge_chat"
+    "$REPOS/Knowledge"
     "$REPOS/calendar"
     "$REPOS/Trading"
 )
@@ -60,4 +61,4 @@ else
 fi
 
 echo ""
-echo -e "${GREEN}Done.${NC} All repos symlinked to $MASTER"
+    echo -e "${GREEN}Done.${NC} All repos symlinked to $MASTER"
