@@ -9,7 +9,8 @@ Complete agent and coding guidelines for this repository.
 - Workspace entry point — all repos live under `~/REPOS/`
 - Read each repo's `.github/copilot-instructions.md` before editing it
 - Host profile key: `thinkpad-p16s-gen4`
-- Secrets and credentials live in `secrets/.env` (gitignored) — check there before prompting the user (e.g. `SUDO_PASSWORD` for sudo prompts)
+- Secrets and credentials live in `~/ENV/.env` (single master file, outside all repos) — check there before prompting the user (e.g. `SUDO_PASSWORD` for sudo prompts)
+- `secrets/.env` is a symlink → `~/ENV/.env`; all other repo `.env` files are symlinks too
 
 ## Routing
 
@@ -19,7 +20,7 @@ Complete agent and coding guidelines for this repository.
 | Hardware-specific apps      | `dotfiles_hyprland/packages/thinkpad-p16s-gen4.txt` |
 | Dotfiles / app configs      | `dotfiles_hyprland/config/`                       |
 | Systemd services, sysctl    | `system/` in this repo                            |
-| Secrets                     | `secrets/` in this repo (gitignored)              |
+| Secrets                     | `~/ENV/.env` (master); symlinked into every repo  |
 
 ## Boundaries
 
