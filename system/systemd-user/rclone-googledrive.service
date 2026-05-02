@@ -4,7 +4,7 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-Type=notify
+Type=simple
 ExecStartPre=/bin/mkdir -p %h/GoogleDrive
 ExecStart=/usr/bin/rclone mount n: %h/GoogleDrive \
     --vfs-cache-mode full \
