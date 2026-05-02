@@ -123,6 +123,26 @@ check_services() {
         fi
     done < "$services_file"
 
+    local user_services_file="$MACHINE_DIR/system/user-services.txt"
+    if [ -f "$user_services_file" ]; then
+        while IFS= read -r service || [[ -n "$service" ]]; do
+            [[ "$service" =~ ^[[:space:]]*# ]] && continue
+            [[ -z "${service// }" ]] && continue
+
+            if systemctl --user is-enabled "$service" &>/dev/null; then
+                if systemctl --user is-active "$service" &>/dev/null; then
+                    echo -e "  ${GREEN}✓${NC} $service (user, enabled, running)"
+                else
+                    echo -e "  ${YELLOW}⚠${NC} $service (user, enabled, not running)"
+                    all_ok=0
+                fi
+            else
+                echo -e "  ${RED}✗${NC} $service (user, not enabled)"
+                all_ok=0
+            fi
+        done < "$user_services_file"
+    fi
+
     if [ "$all_ok" -eq 0 ]; then
         echo ""
         echo -e "  ${YELLOW}Run './setup.sh services' to fix service issues${NC}"

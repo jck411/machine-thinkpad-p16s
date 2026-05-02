@@ -65,6 +65,8 @@ machine-thinkpad-p16s/
 ├── update.sh               # Pull + reconcile + optional system update
 ├── system/
 │   ├── services.txt        # systemd units to enable
+│   ├── user-services.txt   # user systemd units to enable
+│   ├── systemd-user/       # user systemd unit files
 │   ├── sysctl.conf         # kernel parameter overrides
 │   └── networkmanager/     # NM config drops
 ├── secrets/                # gitignored — credentials mount point
@@ -87,6 +89,10 @@ machine-thinkpad-p16s/       dotfiles_hyprland/
 ```
 
 This repo **calls** dotfiles scripts. The agent also **edits dotfiles directly** when making configuration changes.
+
+## Google Drive
+
+Google Drive is mounted at `~/GoogleDrive` through a user `rclone` systemd service tracked in this repo. See [`docs/google-drive.md`](docs/google-drive.md).
 
 ## Security
 

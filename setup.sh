@@ -197,6 +197,41 @@ setup_services() {
         sudo systemctl daemon-reload
     fi
 
+    # Copy and enable user systemd units if present
+    local user_units_dir="$MACHINE_DIR/system/systemd-user"
+    if [ -d "$user_units_dir" ] && [ "$(ls -A "$user_units_dir" 2>/dev/null)" ]; then
+        echo -e "  ${BLUE}Installing user systemd units...${NC}"
+        mkdir -p "$HOME/.config/systemd/user"
+        for unit in "$user_units_dir"/*; do
+            [ -f "$unit" ] || continue
+            local unit_name
+            unit_name=$(basename "$unit")
+            cp "$unit" "$HOME/.config/systemd/user/$unit_name"
+            echo -e "  ${GREEN}✓${NC} Installed user unit $unit_name"
+        done
+        systemctl --user daemon-reload
+    fi
+
+    local user_services_file="$MACHINE_DIR/system/user-services.txt"
+    if [ -f "$user_services_file" ]; then
+        while IFS= read -r service || [[ -n "$service" ]]; do
+            [[ "$service" =~ ^[[:space:]]*# ]] && continue
+            [[ -z "${service// }" ]] && continue
+
+            if systemctl --user list-unit-files | grep -q "^$service"; then
+                if systemctl --user is-enabled "$service" &>/dev/null; then
+                    echo -e "  ${GREEN}✓${NC} $service (user, already enabled)"
+                else
+                    echo -e "  ${BLUE}→${NC} Enabling user service $service..."
+                    systemctl --user enable "$service"
+                    changed=1
+                fi
+            else
+                echo -e "  ${YELLOW}⚠ Skipping user service $service, not installed${NC}"
+            fi
+        done < "$user_services_file"
+    fi
+
     # Deploy tmpfiles.d drop-ins (THP, etc.)
     local tmpfiles_dir="$MACHINE_DIR/system/tmpfiles.d"
     if [ -d "$tmpfiles_dir" ] && [ "$(ls -A "$tmpfiles_dir" 2>/dev/null)" ]; then

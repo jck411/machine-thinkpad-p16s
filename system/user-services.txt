@@ -1,0 +1,5 @@
+# User systemd services to enable on this machine
+# One service per line. Lines starting with # are comments.
+
+# Google Drive mount
+rclone-googledrive.service
