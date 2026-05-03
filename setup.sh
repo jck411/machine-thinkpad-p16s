@@ -109,6 +109,10 @@ setup_configs() {
         echo -e "  ${GREEN}✓${NC} shell configs" || \
         echo -e "  ${YELLOW}⚠${NC} shell configs (may already be linked)"
 
+    # Ensure standard XDG user directories exist (Pictures, Videos, etc.)
+    xdg-user-dirs-update
+    echo -e "  ${GREEN}✓${NC} XDG user directories"
+
     echo ""
 }
 
