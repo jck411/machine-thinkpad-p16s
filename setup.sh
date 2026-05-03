@@ -321,6 +321,13 @@ main() {
             setup_packages
             setup_configs
             setup_services
+            # Ensure user is in video group (required for webcam access)
+            if ! groups "$USER" | grep -qw video; then
+                sudo usermod -aG video "$USER"
+                echo -e "  ${GREEN}✓${NC} Added $USER to video group (re-login to take effect)"
+            else
+                echo -e "  ${GREEN}✓${NC} $USER already in video group"
+            fi
             echo -e "${GREEN}${BOLD}✓ Setup complete!${NC}"
             ;;
         dotfiles)

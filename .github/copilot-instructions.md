@@ -17,6 +17,7 @@ Control plane for a ThinkPad P16s Gen 4 AMD running EndeavourOS (Arch) + Hyprlan
 9. **Verify before acting**: if an app or product is unfamiliar, search online first; never refuse due to unfamiliarity.
 10. **Propagate changes** to ALL affected repos—no partial updates.
 11. **All installs go through the LLM**: never install manually outside this agent. Every install must follow the workflow in `docs/AI_PLAYBOOK.md` so package lists, configs, and backups stay in sync.
+12. **Check `~/REPOS/symlinked-env/.env` for ALL secrets** (sudo password, API keys, tokens) before prompting the user—the answer is likely already there.
 
 ## Required Post-Change Checklist
 
