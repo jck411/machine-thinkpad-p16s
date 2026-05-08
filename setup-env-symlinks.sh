@@ -31,6 +31,7 @@ TARGETS=(
     "$REPOS/Knowledge"
     "$REPOS/calendar"
     "$REPOS/Trading"
+    "$REPOS/NETWORK"
 )
 
 # machine-thinkpad-p16s uses secrets/.env
