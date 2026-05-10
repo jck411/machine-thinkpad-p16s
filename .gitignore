@@ -17,3 +17,7 @@ state/*
 *.swo
 *~
 .vscode/settings.json
+
+secrets/.env.config
+
+secrets/.env.network
