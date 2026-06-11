@@ -40,10 +40,10 @@ When asked to install or update any app, follow these steps in order:
 
 1. **Verify the app is real** — search online if unfamiliar; never refuse due to unfamiliarity.
 2. **Check if already installed** — `which <app>`, `pacman -Q <pkg>`, check `/opt/`, `~/.local/bin/`, `~/.local/share/applications/`
-3. **Determine install type** — pacman/yay → `yay -S <pkg>`; tarball → `/opt/<App>/`; Python → `uv`
+3. **Determine install type** — pacman/yay → `yay -S <pkg>`; Python → `uv`. Tarball installs to `/opt/<App>/` are deprecated — prefer AUR/pacman packages when available.
 4. **Compare versions** if already installed — same: confirm before reinstalling; newer: proceed
-5. **Install or update** — confirm before overwriting `/opt/` or system paths
-6. **Clean up** — remove old dirs, leftover tarballs, stale `.desktop` entries
+5. **Install or update** — confirm before overwriting system paths
+6. **Clean up** — remove old dirs, stale `.desktop` entries
 7. **Update docs** — add to `dotfiles_hyprland/packages/base.txt` or `thinkpad-p16s-gen4.txt`; annotate manual installs with `# [MANUAL]`; add config to `dotfiles_hyprland/config/` + `install.sh` if applicable
 8. **Commit and push** both repos
 
