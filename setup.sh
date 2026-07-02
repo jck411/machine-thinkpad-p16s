@@ -127,6 +127,20 @@ setup_configs() {
 setup_services() {
     echo -e "${BOLD}${CYAN}[4/4] Systemd services${NC}"
 
+    # Install custom systemd units before enabling services listed below.
+    local units_dir="$MACHINE_DIR/system/systemd"
+    if [ -d "$units_dir" ] && [ "$(ls -A "$units_dir" 2>/dev/null)" ]; then
+        echo -e "  ${BLUE}Installing custom systemd units...${NC}"
+        for unit in "$units_dir"/*; do
+            [ -f "$unit" ] || continue
+            local unit_name
+            unit_name=$(basename "$unit")
+            sudo cp "$unit" "/etc/systemd/system/$unit_name"
+            echo -e "  ${GREEN}✓${NC} Installed $unit_name"
+        done
+        sudo systemctl daemon-reload
+    fi
+
     local services_file="$MACHINE_DIR/system/services.txt"
     if [ ! -f "$services_file" ]; then
         echo -e "  ${YELLOW}⚠ No services.txt found — skipping${NC}"
@@ -190,19 +204,6 @@ setup_services() {
         done
         sudo systemctl restart systemd-logind
         echo -e "  ${GREEN}✓${NC} logind restarted"
-    fi
-
-    # Copy custom systemd units if present
-    local units_dir="$MACHINE_DIR/system/systemd"
-    if [ -d "$units_dir" ] && [ "$(ls -A "$units_dir" 2>/dev/null)" ]; then
-        echo -e "  ${BLUE}Installing custom systemd units...${NC}"
-        for unit in "$units_dir"/*; do
-            local unit_name
-            unit_name=$(basename "$unit")
-            sudo cp "$unit" "/etc/systemd/system/$unit_name"
-            echo -e "  ${GREEN}✓${NC} Installed $unit_name"
-        done
-        sudo systemctl daemon-reload
     fi
 
     # Copy and enable user systemd units if present
@@ -317,6 +318,11 @@ setup_services() {
 # Main
 # =========================================================================
 main() {
+    if [ "$EUID" -eq 0 ]; then
+        echo -e "${RED}✗ Do not run setup.sh with sudo; it uses sudo only for system changes.${NC}"
+        exit 1
+    fi
+
     print_header
 
     case "${1:-all}" in

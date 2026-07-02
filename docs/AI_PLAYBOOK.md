@@ -71,3 +71,7 @@ When asked to install or update any app, follow these steps in order:
 - **Correct autohide on Hyprland**: poll `hyprctl cursorpos`, send `SIGUSR1` (show) / `SIGUSR2` (hide) to waybar. Use `start_hidden: true`, `on-sigusr1: "show"`, `on-sigusr2: "hide"` in config. No `mode` key.
 - **`pkill` matches substrings** — `pkill -SIGUSR1 waybar` also kills scripts containing "waybar". Always use `pkill -x` for exact binary name matching.
 - **Research before implementing** — check official docs to confirm features work on Hyprland specifically, not just Sway.
+
+## ThinkPad Hardware Gotchas
+
+- **MediaTek Bluetooth may boot without a BlueZ controller**: if `rfkill` sees `hci*` but `bluetoothctl show` says `No default controller available`, the `btusb`/`btmtk` init likely timed out. `bluetooth-controller-recover.service` reloads `btusb` at boot only when BlueZ has no controller.

@@ -1,0 +1,12 @@
+[Unit]
+Description=Recover Bluetooth controller after MediaTek btusb init failure
+After=bluetooth.service systemd-rfkill.service
+Wants=bluetooth.service
+
+[Service]
+Type=oneshot
+TimeoutStartSec=35s
+ExecStart=/usr/bin/bash -c 'if /usr/bin/bluetoothctl show >/dev/null 2>&1; then exit 0; fi; /usr/bin/systemctl stop bluetooth.service; /usr/bin/modprobe -r btusb || true; /usr/bin/sleep 2; /usr/bin/modprobe btusb; /usr/bin/rfkill unblock bluetooth || true; /usr/bin/sleep 12; /usr/bin/systemctl start bluetooth.service; /usr/bin/sleep 2; /usr/bin/bluetoothctl show >/dev/null 2>&1'
+
+[Install]
+WantedBy=multi-user.target
