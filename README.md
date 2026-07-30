@@ -45,7 +45,7 @@ This will:
 
 ### Full update (pull + system upgrade)
 ```bash
-./update.sh full            # Pull, check packages, check services, pacman -Syu
+./update.sh full            # Pull, check packages/services, update official + AUR packages
 ```
 
 ### Run individual steps
@@ -54,8 +54,13 @@ This will:
 ./setup.sh packages         # Just install missing packages
 ./setup.sh configs          # Just link configs
 ./setup.sh services         # Just enable services
-./update.sh system          # Just run pacman -Syu + yay -Sua
+./update.sh system          # Unattended official + AUR update
 ```
+
+System updates use `yay --noconfirm` with the stored machine credential, so
+they do not pause for confirmation or a password. A success marker is written
+only after the full update exits cleanly. Progress, failures, and post-update
+warnings are kept in `~/.local/state/machine-update/`.
 
 ## Structure
 
@@ -63,6 +68,9 @@ This will:
 machine-thinkpad-p16s/
 ├── setup.sh                # Full bootstrap (idempotent)
 ├── update.sh               # Pull + reconcile + optional system update
+├── scripts/
+│   ├── sudo-unattended.sh  # Password bridge for non-TTY sudo calls
+│   └── system-update.sh    # Logged, unattended official + AUR updater
 ├── system/
 │   ├── services.txt        # systemd units to enable
 │   ├── user-services.txt   # user systemd units to enable
@@ -85,7 +93,7 @@ machine-thinkpad-p16s/       dotfiles_hyprland/
 │                             │   ├── base.txt
 │                             │   └── thinkpad-p16s-gen4.txt
 │                             └── config/hypr/hosts/
-│                                 └── thinkpad-p16s-gen4.conf
+│                                 └── thinkpad-p16s-gen4.lua
 ```
 
 This repo **calls** dotfiles scripts. The agent also **edits dotfiles directly** when making configuration changes.

@@ -154,26 +154,7 @@ check_services() {
 # System updates (Arch)
 # =========================================================================
 system_update() {
-    echo -e "${BOLD}${CYAN}=== System Update ===${NC}"
-
-    # Prime sudo from stored credentials so it doesn't prompt mid-run
-    local env_file="$MACHINE_DIR/secrets/.env"
-    if [ -f "$env_file" ]; then
-        local sudo_pass
-        sudo_pass=$(grep -oP 'SUDO_PASSWORD=\K.*' "$env_file" 2>/dev/null || true)
-        if [ -n "$sudo_pass" ]; then
-            echo "$sudo_pass" | sudo -S true 2>/dev/null && \
-                echo -e "  ${GREEN}✓${NC} sudo authenticated" || \
-                echo -e "  ${YELLOW}⚠${NC} sudo auth failed — may prompt for password"
-        fi
-    fi
-
-    echo -e "  ${BLUE}Updating official + AUR packages...${NC}"
-    yay -Syu --noconfirm
-    echo -e "  ${GREEN}✓${NC} Packages updated"
-    echo ""
-
-    echo -e "${GREEN}✓ System updated${NC}"
+    "$MACHINE_DIR/scripts/system-update.sh"
 }
 
 # =========================================================================
@@ -187,7 +168,7 @@ show_help() {
     echo "  pull         Pull all repos"
     echo "  packages     Show package diff"
     echo "  services     Check service status"
-    echo "  system       Run pacman -Syu + yay -Sua"
+    echo "  system       Update official + AUR packages without prompts"
     echo "  full         Pull + packages + services + system update"
     echo "  help         Show this help"
 }

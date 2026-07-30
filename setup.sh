@@ -82,8 +82,8 @@ setup_configs() {
     fi
 
     # Set host profile non-interactively
-    local host_link="$DOTFILES_DIR/config/hypr/host.conf"
-    ln -sf "hosts/${HOST_PROFILE}.conf" "$host_link"
+    local host_link="$DOTFILES_DIR/config/hypr/host.lua"
+    ln -sf "hosts/${HOST_PROFILE}.lua" "$host_link"
     echo -e "  ${GREEN}✓${NC} Host profile set to ${BOLD}$HOST_PROFILE${NC}"
 
     # Run full install (creates all symlinks)
@@ -92,7 +92,7 @@ setup_configs() {
     # Install each component non-interactively
     for component in hypr waybar foot foot-quake rofi mako gtk-3.0 gtk-4.0 \
                      Thunar mpv networkmanager-dmenu nwg-displays \
-                     xdg-desktop-portal scripts; do
+                     xdg-desktop-portal scripts shell; do
         "$install_script" "$component" 2>/dev/null && \
             echo -e "  ${GREEN}✓${NC} $component" || \
             echo -e "  ${YELLOW}⚠${NC} $component (may already be linked)"
