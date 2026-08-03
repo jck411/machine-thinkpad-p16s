@@ -68,7 +68,7 @@ authenticate_sudo() {
     fi
 
     echo "Error: stored SUDO_PASSWORD was rejected." >&2
-    echo "Update $HOME/REPOS/symlinked-env/.env and rerun." >&2
+    echo "Update the repository-local secrets/.env and rerun." >&2
     return 1
 }
 

@@ -4,7 +4,8 @@
 
 set -euo pipefail
 
-SECRETS_FILE="$HOME/REPOS/symlinked-env/.env"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SECRETS_FILE="$SCRIPT_DIR/../secrets/.env"
 
 if [ ! -r "$SECRETS_FILE" ]; then
     echo "Error: secrets file is not readable: $SECRETS_FILE" >&2
