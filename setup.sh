@@ -105,10 +105,6 @@ setup_configs() {
             echo -e "  ${YELLOW}⚠${NC} $file (may already be linked)"
     done
 
-    "$install_script" antigravity.desktop 2>/dev/null && \
-        echo -e "  ${GREEN}✓${NC} antigravity.desktop" || \
-        echo -e "  ${YELLOW}⚠${NC} antigravity.desktop (may already be linked)"
-
     "$install_script" shell 2>/dev/null && \
         echo -e "  ${GREEN}✓${NC} shell configs" || \
         echo -e "  ${YELLOW}⚠${NC} shell configs (may already be linked)"
