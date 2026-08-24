@@ -107,3 +107,4 @@ Google Drive is mounted at `~/GoogleDrive` through a user `rclone` systemd servi
 - `secrets/` is gitignored — never committed
 - No tokens, API keys, or credentials in tracked files
 - SSH keys, rclone configs, etc. are managed outside both repos
+- The active firewalld `public` zone permits mDNS for local Android device discovery.
