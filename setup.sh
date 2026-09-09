@@ -66,6 +66,7 @@ setup_packages() {
     else
         "$pkg_script" install "$HOST_PROFILE"
     fi
+    "$MACHINE_DIR/scripts/install-hermes-desktop.sh"
     echo ""
 }
 
