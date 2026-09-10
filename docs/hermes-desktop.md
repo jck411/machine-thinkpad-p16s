@@ -9,6 +9,9 @@ Sessions, models, tools, and Telegram stay on the server. Use browser sign-in
 in the gateway settings and complete Cloudflare Access if prompted, then the
 dashboard login. The app's login session is separate from your web browser.
 See [server credentials and operations](../../PROXMOX/docs/hermes.md).
+Edit the home agent's settings and profile SOUL files through the connected UI
+or directly on the VM. They are not mirrored in a laptop repository, and service
+repair preserves UI edits. This repository owns the desktop client and connection.
 
 **Extra gateway headers** must contain `CF-Access-Client-Id` and
 `CF-Access-Client-Secret` from service token `hermes-desktop-thinkpad-p16s`,
