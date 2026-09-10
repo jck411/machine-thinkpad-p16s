@@ -9,6 +9,18 @@ window. The app keeps its own login session, separate from your web browser;
 sign in again when it expires. Server credentials are documented in
 [Hermes operations](../../PROXMOX/docs/hermes.md).
 
+The remote connection's **Extra gateway headers** contain
+`CF-Access-Client-Id` and `CF-Access-Client-Secret` for Cloudflare service token
+`hermes-desktop-thinkpad-p16s`. Its Service Auth policy permits only the Hermes
+application. These headers authenticate HTTP and WebSocket traffic; the
+dashboard login remains required. Browser cookies alone do not authenticate
+the desktop's WebSocket connection through Cloudflare Access.
+
+The token is private in `secrets/hermes-cloudflare.json` and Hermes's app-owned
+connection settings. Renew its one-year lifetime in Cloudflare Zero Trust →
+Access → Service credentials before expiry; renewal preserves the credential.
+See [Cloudflare service tokens](https://developers.cloudflare.com/cloudflare-one/access-controls/service-credentials/service-tokens/).
+
 `setup.sh packages` includes the desktop installation. To install it separately:
 
 ```bash
