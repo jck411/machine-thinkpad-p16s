@@ -100,10 +100,9 @@ This repo **calls** dotfiles scripts. The agent also **edits dotfiles directly**
 
 ## Hermes
 
-The desktop app connects to the home agent on Proxmox VM 114. This repository
-owns the desktop installation and connection; agent settings and personas are
-edited on the VM. See [Hermes Desktop](docs/hermes-desktop.md) for client setup
-and [Hermes operations](../PROXMOX/docs/hermes.md) for server access and recovery.
+Use the browser dashboard for the home agent on VM 114. Settings and personas
+are edited on the VM. See [Hermes access](docs/hermes.md) and
+[server operations](../PROXMOX/docs/hermes.md).
 
 ## Google Drive
 

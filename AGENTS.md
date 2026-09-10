@@ -6,12 +6,11 @@ Control plane for a ThinkPad P16s Gen 4 AMD running EndeavourOS (Arch) + Hyprlan
 
 ## Hermes routing
 
-The desktop connects to Hermes on VM 114. Requests to change the home agent's
-settings, profiles, SOUL.md, or tools must operate directly on that VM, preserving
-UI and agent edits. Do not change the laptop's local agent or generate runtime
+Use the browser dashboard for Hermes on VM 114. Requests to change the home
+agent's settings, profiles, SOUL.md, or tools must operate directly on that VM,
+preserving UI and agent edits. Do not install a laptop agent or generate runtime
 configuration in a repository. PROXMOX retains installation and recovery tooling;
-follow [its Hermes runbook](../PROXMOX/docs/hermes.md). This repository owns only
-the desktop installation and its local connection settings.
+follow [its Hermes runbook](../PROXMOX/docs/hermes.md).
 
 ## Non-Negotiable Rules
 
