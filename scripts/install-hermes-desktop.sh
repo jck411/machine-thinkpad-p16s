@@ -23,7 +23,7 @@ fi
 "$HERMES_COMMAND" config set desktop.electron_flags '["--ozone-platform=wayland", "--enable-wayland-ime"]'
 
 if [ ! -e "$CONNECTION_FILE" ]; then
-    gateway_url=$(jq -er '.[] | select(.name == "Hermes") | .url' \
+    gateway_url=$(jq -er '.[] | select(.name == "Hermes") | .public_url' \
         "$MACHINE_DIR/../NETWORK/lxc/services.json")
     mkdir -p "$(dirname "$CONNECTION_FILE")"
     (umask 077; jq -n --arg url "$gateway_url" \
