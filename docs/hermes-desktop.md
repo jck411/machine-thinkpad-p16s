@@ -1,25 +1,21 @@
 # Hermes Desktop
 
-Launch **Hermes** from Rofi or run `hermes desktop`. The desktop connects to
-the existing home agent; sessions, models, tools, and Telegram stay on the server.
-The desktop connects through `https://hermes.jackshome.com`, at home or away.
-In the desktop's gateway settings, use that URL and the browser sign-in option.
-Complete Cloudflare Access and then the dashboard login in the app's sign-in
-window. The app keeps its own login session, separate from your web browser;
-sign in again when it expires. Server credentials are documented in
-[Hermes operations](../../PROXMOX/docs/hermes.md).
+Launch **Hermes** from Rofi or run `hermes desktop`. It always connects to the
+home agent through `https://hermes.jackshome.com`, at home or away. No automatic
+LAN switching or fallback is configured. **Local** runs an agent on the laptop;
+it does not select the home server's LAN address.
 
-The remote connection's **Extra gateway headers** contain
-`CF-Access-Client-Id` and `CF-Access-Client-Secret` for Cloudflare service token
-`hermes-desktop-thinkpad-p16s`. Its Service Auth policy permits only the Hermes
-application. These headers authenticate HTTP and WebSocket traffic; the
-dashboard login remains required. Browser cookies alone do not authenticate
-the desktop's WebSocket connection through Cloudflare Access.
+Sessions, models, tools, and Telegram stay on the server. Use browser sign-in
+in the gateway settings and complete Cloudflare Access if prompted, then the
+dashboard login. The app's login session is separate from your web browser.
+See [server credentials and operations](../../PROXMOX/docs/hermes.md).
 
-The token is private in `secrets/hermes-cloudflare.json` and Hermes's app-owned
-connection settings. Renew its one-year lifetime in Cloudflare Zero Trust →
-Access → Service credentials before expiry; renewal preserves the credential.
-See [Cloudflare service tokens](https://developers.cloudflare.com/cloudflare-one/access-controls/service-credentials/service-tokens/).
+**Extra gateway headers** must contain `CF-Access-Client-Id` and
+`CF-Access-Client-Secret` from service token `hermes-desktop-thinkpad-p16s`,
+authorized only for Hermes. They authenticate HTTP and WebSocket traffic;
+dashboard login is still required. The token is private in
+`secrets/hermes-cloudflare.json` and the app's connection settings. Renew its
+one-year lifetime before expiry using [Cloudflare Service credentials](https://developers.cloudflare.com/cloudflare-one/access-controls/service-credentials/service-tokens/).
 
 `setup.sh packages` includes the desktop installation. To install it separately:
 
@@ -27,11 +23,10 @@ See [Cloudflare service tokens](https://developers.cloudflare.com/cloudflare-one
 ./scripts/install-hermes-desktop.sh
 ```
 
-The script installs the pinned official release through its uv-based installer,
-builds the Linux desktop, and registers the upstream launcher and icon. Wayland
-and IME flags are applied through Hermes's own settings. The initial gateway URL
-comes from the Hermes `public_url` in `NETWORK/lxc/services.json`; existing
-connection settings are preserved.
+The script installs the pinned release, builds the desktop, registers its
+launcher, and configures Wayland/IME. It seeds the URL from the Hermes
+`public_url` in `NETWORK/lxc/services.json`, preserving existing connections.
+A fresh installation still needs the service-token headers and dashboard login.
 
 The runtime lives in `~/.hermes/hermes-agent/`, with commands in `~/.local/bin/`.
 Hermes owns its settings, sessions, and credentials in `~/.hermes/` and
