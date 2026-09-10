@@ -34,3 +34,8 @@ Hermes owns its settings, sessions, and credentials in `~/.hermes/` and
 Updates follow upstream `main`. Use `hermes update --backup` through the agent
 install workflow; verify desktop and server versions, connection, and model
 routes together after updating. Release tags do not define the update channel.
+
+Automatic update backups are disabled in the laptop's app-owned configuration.
+The explicit `--backup` flag still creates a Hermes-state ZIP and retains the
+latest five pre-update ZIPs. Desktop connection/login state in `~/.config/Hermes/`
+is outside that backup.
