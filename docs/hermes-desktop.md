@@ -35,8 +35,15 @@ The runtime lives in `~/.hermes/hermes-agent/`, with commands in `~/.local/bin/`
 Hermes owns its settings, sessions, and credentials in `~/.hermes/` and
 `~/.config/Hermes/`; neither directory belongs in Git or dotfiles sync.
 Updates follow upstream `main`. Use `hermes update --backup` through the agent
-install workflow; verify desktop and server versions, connection, and model
-routes together after updating. Release tags do not define the update channel.
+install workflow, then run `scripts/install-hermes-desktop.sh` to reapply the
+maintained `system/hermes/remote-restart.patch` and rebuild changed sources.
+Verify desktop and server versions, connection, and model routes together after
+updating. Release tags do not define the update channel.
+
+**Restart backend** restarts the selected remote dashboard over its authenticated
+connection and waits for a new server process before refreshing model settings.
+Server installation and restart supervision are owned by the
+[Hermes runbook](../../PROXMOX/docs/hermes.md).
 
 Automatic update backups are disabled in the laptop's app-owned configuration.
 The explicit `--backup` flag still creates a Hermes-state ZIP and retains the

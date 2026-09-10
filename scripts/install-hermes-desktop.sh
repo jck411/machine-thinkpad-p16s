@@ -29,8 +29,10 @@ if [ ! -e "$CONNECTION_FILE" ]; then
         > "$CONNECTION_FILE")
 fi
 
-if [ -x "$HERMES_ROOT/apps/desktop/release/linux-unpacked/Hermes" ]; then
-    "$HERMES_COMMAND" desktop --skip-build --build-only
-else
-    "$HERMES_COMMAND" desktop --build-only
+patch_file="$MACHINE_DIR/system/hermes/remote-restart.patch"
+if ! git -C "$HERMES_ROOT" apply --reverse --check "$patch_file" 2>/dev/null; then
+    git -C "$HERMES_ROOT" apply --check "$patch_file"
+    git -C "$HERMES_ROOT" apply "$patch_file"
 fi
+# Hermes's content stamp rebuilds only when installed sources have changed.
+"$HERMES_COMMAND" desktop --build-only

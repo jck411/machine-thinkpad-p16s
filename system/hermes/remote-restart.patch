@@ -1,0 +1,97 @@
+--- a/apps/desktop/electron/main.ts
++++ b/apps/desktop/electron/main.ts
+@@ -15211,7 +15211,21 @@
+   }
+ })
+ 
+-ipcMain.handle('hermes:backend:recycle', async (_event, profile) => {
++ipcMain.handle('hermes:backend:recycle', async (event, profile) => {
++  const route = windowConnectionRoutes.get(event.sender.id)
++  const targetProfile = typeof profile === 'string' && profile ? profile : route?.profile || primaryProfileKey()
++  const connection = route?.registryScoped && route.connectionId
++    ? await ensureRegistryBackend(route.connectionId, targetProfile)
++    : await ensureBackend(targetProfile)
++
++  if (connection.mode === 'remote' && connection.remoteKind !== 'ssh') {
++    const { restartRemoteBackend } = await import('./backend-remote-restart')
++
++    await restartRemoteBackend((path, options) => fetchJsonForBackend(connection, path, options))
++
++    return { ok: true }
++  }
++
+   // Models-page recovery after a code-skew 503 (#97046): kill the owned
+   // SSH serve (if any) before the local child so reconnect cannot reuse a
+   // stale lockfile. Soft primary teardown keeps the renderer shell mounted.
+--- /dev/null
++++ b/apps/desktop/electron/backend-remote-restart.ts
+@@ -0,0 +1,31 @@
++type Request = (path: string, options: { method?: string; timeoutMs: number }) => Promise<any>
++
++/** Keep all requests pinned to the backend selected when the user clicked. */
++export async function restartRemoteBackend(request: Request, timeoutMs = 90_000): Promise<void> {
++  const accepted = await request('/api/backend/restart', { method: 'POST', timeoutMs: 10_000 })
++
++  if (accepted?.ok !== true || typeof accepted.instance_id !== 'string' || !accepted.instance_id) {
++    throw new Error('The backend did not acknowledge the restart.')
++  }
++
++  const deadline = Date.now() + timeoutMs
++
++  while (Date.now() < deadline) {
++    await new Promise(resolve => setTimeout(resolve, 1_000))
++
++    let runtime
++
++    try {
++      runtime = await request('/api/backend/runtime', { timeoutMs: Math.min(5_000, Math.max(1, deadline - Date.now())) })
++    } catch {
++      // Connection failures and proxy 502s are expected during the restart.
++      continue
++    }
++
++    if (typeof runtime?.instance_id === 'string' && runtime.instance_id && runtime.instance_id !== accepted.instance_id) {
++      return
++    }
++  }
++
++  throw new Error('The backend did not return after restarting. Check the server service and reconnect.')
++}
+--- /dev/null
++++ b/apps/desktop/electron/backend-remote-restart.test.ts
+@@ -0,0 +1,35 @@
++import { afterEach, expect, it, vi } from 'vitest'
++
++import { restartRemoteBackend } from './backend-remote-restart'
++
++afterEach(() => vi.useRealTimers())
++
++it('waits through the old process and an outage until a new process answers', async () => {
++  vi.useFakeTimers()
++  const request = vi.fn()
++    .mockResolvedValueOnce({ ok: true, instance_id: 'old' })
++    .mockResolvedValueOnce({ instance_id: 'old' })
++    .mockRejectedValueOnce(new Error('502 Bad Gateway'))
++    .mockResolvedValueOnce({ instance_id: 'new' })
++  let finished = false
++  const restart = restartRemoteBackend(request).then(() => { finished = true })
++
++  await vi.advanceTimersByTimeAsync(2_000)
++  expect(finished).toBe(false)
++  await vi.advanceTimersByTimeAsync(1_000)
++  await restart
++  expect(request.mock.calls.filter(([, options]) => options.method === 'POST')).toHaveLength(1)
++})
++
++it('reports a refused restart and a backend that never replaces its process', async () => {
++  vi.useFakeTimers()
++  const denied = vi.fn().mockRejectedValue(new Error('403 Forbidden'))
++  await expect(restartRemoteBackend(denied)).rejects.toThrow('403 Forbidden')
++  expect(denied).toHaveBeenCalledTimes(1)
++
++  const request = vi.fn().mockResolvedValue({ instance_id: 'old' })
++    .mockResolvedValueOnce({ ok: true, instance_id: 'old' })
++  const result = expect(restartRemoteBackend(request, 2_000)).rejects.toThrow('did not return')
++  await vi.advanceTimersByTimeAsync(2_000)
++  await result
++})
