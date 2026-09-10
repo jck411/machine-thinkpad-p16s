@@ -98,6 +98,13 @@ machine-thinkpad-p16s/       dotfiles_hyprland/
 
 This repo **calls** dotfiles scripts. The agent also **edits dotfiles directly** when making configuration changes.
 
+## Hermes
+
+The desktop app connects to the home agent on Proxmox VM 114. This repository
+owns the desktop installation and connection; agent settings and personas are
+edited on the VM. See [Hermes Desktop](docs/hermes-desktop.md) for client setup
+and [Hermes operations](../PROXMOX/docs/hermes.md) for server access and recovery.
+
 ## Google Drive
 
 Google Drive is mounted at `~/GoogleDrive` through a user `rclone` systemd service tracked in this repo. See [`docs/google-drive.md`](docs/google-drive.md).
