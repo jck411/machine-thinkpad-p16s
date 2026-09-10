@@ -30,9 +30,18 @@ if [ ! -e "$CONNECTION_FILE" ]; then
 fi
 
 patch_file="$MACHINE_DIR/system/hermes/remote-restart.patch"
-if ! git -C "$HERMES_ROOT" apply --reverse --check "$patch_file" 2>/dev/null; then
-    git -C "$HERMES_ROOT" apply --check "$patch_file"
-    git -C "$HERMES_ROOT" apply "$patch_file"
+# An upstream update can replace main.ts while retaining patch-created files.
+stats=$(git -C "$HERMES_ROOT" apply --numstat "$patch_file")
+pending=()
+while IFS=$'\t' read -r added removed path; do
+    if git -C "$HERMES_ROOT" apply --reverse --check "--include=$path" "$patch_file" 2>/dev/null; then
+        continue
+    fi
+    git -C "$HERMES_ROOT" apply --check "--include=$path" "$patch_file"
+    pending+=("--include=$path")
+done <<< "$stats"
+if ((${#pending[@]})); then
+    git -C "$HERMES_ROOT" apply "${pending[@]}" "$patch_file"
 fi
 # Hermes's content stamp rebuilds only when installed sources have changed.
 "$HERMES_COMMAND" desktop --build-only

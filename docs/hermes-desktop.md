@@ -37,6 +37,7 @@ Hermes owns its settings, sessions, and credentials in `~/.hermes/` and
 Updates follow upstream `main`. Use `hermes update --backup` through the agent
 install workflow, then run `scripts/install-hermes-desktop.sh` to reapply the
 maintained `system/hermes/remote-restart.patch` and rebuild changed sources.
+The installer reapplies replaced files while retaining already applied parts.
 Verify desktop and server versions, connection, and model routes together after
 updating. Release tags do not define the update channel.
 
