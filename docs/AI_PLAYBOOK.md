@@ -49,6 +49,26 @@ When asked to install or update any app, follow these steps in order:
 
 ---
 
+## Uninstall Workflow
+
+1. Remove package declarations and setup/install hooks from every affected repo.
+2. Identify package-owned files with `pacman -Qo`; preview removal with
+   `pacman -Rs --print-format '%n %v' <package>`, then uninstall the app and
+   dependencies used only by it through pacman.
+3. Remove custom desktop entries, MIME associations, file-manager actions,
+   keybindings, shell wrappers, autostart entries, services, and editor extensions.
+4. Remove app-specific download/build caches. Refresh the desktop database and
+   invalidate Rofi's desktop cache after launcher changes.
+5. Preserve conversations, credentials, and other user data unless deletion is
+   explicitly authorized. Distinguish retained data from executable integrations.
+6. Search affected repos and live integration locations again; verify the package,
+   commands, launch entries, and processes are absent. Inspect other references
+   before removing them: a separate service may still use the same provider.
+7. Validate config syntax and symlinks, update relevant docs, then commit and push
+   task-scoped changes.
+
+---
+
 ## Implementation Standards
 
 ### Shell
