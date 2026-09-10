@@ -7,7 +7,7 @@ Complete agent and coding guidelines for this repository.
 ## Architecture
 
 - Workspace entry point — all repos live under `~/REPOS/`
-- Read each repo's `.github/copilot-instructions.md` before editing it
+- Read each repository's root `AGENTS.md` before editing it
 - Host profile key: `thinkpad-p16s-gen4`
 - Machine-only credentials live in the Git-ignored `secrets/.env`.
 - Each repository owns its own Git-ignored environment files; never share them through symlinks or shell-wide exports.
