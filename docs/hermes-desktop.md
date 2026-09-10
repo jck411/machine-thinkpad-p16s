@@ -23,7 +23,7 @@ one-year lifetime before expiry using [Cloudflare Service credentials](https://d
 ./scripts/install-hermes-desktop.sh
 ```
 
-The script installs the pinned release, builds the desktop, registers its
+The script installs upstream `main`, builds the desktop, registers its
 launcher, and configures Wayland/IME. It seeds the URL from the Hermes
 `public_url` in `NETWORK/lxc/services.json`, preserving existing connections.
 A fresh installation still needs the service-token headers and dashboard login.
@@ -31,5 +31,6 @@ A fresh installation still needs the service-token headers and dashboard login.
 The runtime lives in `~/.hermes/hermes-agent/`, with commands in `~/.local/bin/`.
 Hermes owns its settings, sessions, and credentials in `~/.hermes/` and
 `~/.config/Hermes/`; neither directory belongs in Git or dotfiles sync.
-Updates go through the agent install workflow; desktop and server versions must
-be checked together before updating.
+Updates follow upstream `main`. Use `hermes update --backup` through the agent
+install workflow; verify desktop and server versions, connection, and model
+routes together after updating. Release tags do not define the update channel.
