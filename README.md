@@ -54,13 +54,11 @@ This will:
 ./setup.sh packages         # Just install missing packages
 ./setup.sh configs          # Just link configs
 ./setup.sh services         # Just enable services
-./update.sh system          # Unattended official + AUR update
+./update.sh system          # Reviewed official + AUR update in a terminal
 ```
 
-System updates use `yay --noconfirm` with the stored machine credential, so
-they do not pause for confirmation or a password. A success marker is written
-only after the full update exits cleanly. Progress, failures, and post-update
-warnings are kept in `~/.local/state/machine-update/`.
+Follow the [package update workflow](docs/package-updates.md) for review,
+authentication, logs, and validation.
 
 ## Structure
 
@@ -69,8 +67,7 @@ machine-thinkpad-p16s/
 ├── setup.sh                # Full bootstrap (idempotent)
 ├── update.sh               # Pull + reconcile + optional system update
 ├── scripts/
-│   ├── sudo-unattended.sh  # Password bridge for non-TTY sudo calls
-│   └── system-update.sh    # Logged, unattended official + AUR updater
+│   └── system-update.sh    # Logged, reviewed official + AUR updater
 ├── system/
 │   ├── services.txt        # systemd units to enable
 │   ├── user-services.txt   # user systemd units to enable

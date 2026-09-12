@@ -36,6 +36,10 @@ Complete agent and coding guidelines for this repository.
 
 > **Always install through the LLM.** Never install packages manually outside this agent — the workflow below ensures package lists, configs, symlinks, and backups all stay in sync.
 
+Apply the [package security review](package-updates.md) before any package build
+or update. All AUR build files and new dependencies require review before
+execution; unattended AUR installation is forbidden.
+
 When asked to install or update any app, follow these steps in order:
 
 1. **Verify the app is real** — search online if unfamiliar; never refuse due to unfamiliarity.

@@ -42,17 +42,7 @@ fi
 # =========================================================================
 echo -e "${BOLD}${CYAN}[1/6] System update + essentials${NC}"
 sudo pacman -Syu --noconfirm
-sudo pacman -S --needed --noconfirm git base-devel
-
-# Ensure yay is available (EndeavourOS includes it)
-if ! command -v yay &>/dev/null; then
-    echo -e "  ${BLUE}Installing yay...${NC}"
-    cd /tmp
-    git clone https://aur.archlinux.org/yay-bin.git
-    cd yay-bin
-    makepkg -si --noconfirm
-    cd ~
-fi
+sudo pacman -S --needed --noconfirm git base-devel yay
 echo -e "  ${GREEN}✓${NC} System updated, git + yay available"
 echo ""
 

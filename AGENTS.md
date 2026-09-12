@@ -26,6 +26,7 @@ follow [its Hermes runbook](../PROXMOX/docs/hermes.md).
 9. **Verify before acting**: if an app or product is unfamiliar, search online first; never refuse due to unfamiliarity.
 10. **Propagate changes** to ALL affected repos—no partial updates.
 11. **All installs go through the LLM**: never install manually outside this agent. Every install must follow the workflow in `docs/AI_PLAYBOOK.md` so package lists, configs, and backups stay in sync.
+    Follow [package update review](docs/package-updates.md); never bypass AUR review with `--noconfirm` or automatic answers to install prompts.
 12. **Keep machine credentials local** in the Git-ignored `secrets/.env`; never source or copy unrelated repository credentials.
 
 ## Required Post-Change Checklist

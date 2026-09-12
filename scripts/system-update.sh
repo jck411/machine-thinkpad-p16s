@@ -1,15 +1,19 @@
 #!/bin/bash
 
-# Canonical unattended Arch + AUR update for this machine.
+# Reviewed Arch + AUR update for this machine.
 
 set -Eeuo pipefail
+
+if [ "$#" -ne 0 ] || [ ! -t 0 ]; then
+    echo "Run this updater in a terminal, without arguments, for package review." >&2
+    exit 2
+fi
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/machine-update"
 STATUS_FILE="$STATE_DIR/status"
 SUCCESS_FILE="$STATE_DIR/last-success"
 LOG_FILE="$STATE_DIR/update.log"
 LOCK_FILE="$STATE_DIR/update.lock"
-SUDO_WRAPPER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/sudo-unattended.sh"
 STARTED_AT="$(date --iso-8601=seconds)"
 POSTFLIGHT_WARNINGS=0
 
@@ -60,16 +64,6 @@ stop_update() {
     echo
     echo "Update interrupted by $signal. See: $LOG_FILE" >&2
     exit "$exit_code"
-}
-
-authenticate_sudo() {
-    if "$SUDO_WRAPPER" -v; then
-        return 0
-    fi
-
-    echo "Error: stored SUDO_PASSWORD was rejected." >&2
-    echo "Update the repository-local secrets/.env and rerun." >&2
-    return 1
 }
 
 report_postflight() {
@@ -128,11 +122,25 @@ echo
 echo "System update started: $STARTED_AT"
 echo "Log: $LOG_FILE"
 
-authenticate_sudo
+sudo -v
 
 echo
-echo "Updating official and AUR packages noninteractively..."
-yay --sudo "$SUDO_WRAPPER" -Syu --noconfirm
+echo "Review Arch news and every AUR build-file change before proceeding."
+echo "Stop for unexpected sources, install hooks, dependencies, or maintainer changes."
+yay -Syu --confirm --diffmenu --answerdiff All \
+    --noanswerupgrade --noanswerclean --noansweredit --sudo sudo
+
+# Some package-manager cancellation paths exit successfully. Do not reset the
+# reminder until both repository and AUR updates are actually complete.
+QUERY_STATUS=0
+PENDING_UPDATES="$(yay -Qu 2>&1)" || QUERY_STATUS=$?
+# Like pacman -Qu, yay returns 1 for an empty result. Diagnostics or other
+# failures must still prevent the update from being recorded as complete.
+if [ -n "$PENDING_UPDATES" ] || [ "$QUERY_STATUS" -gt 1 ]; then
+    echo "Could not confirm that all updates are complete (query exit $QUERY_STATUS):"
+    printf '%s\n' "$PENDING_UPDATES"
+    false
+fi
 
 report_postflight
 FINISHED_AT="$(date --iso-8601=seconds)"

@@ -168,7 +168,7 @@ show_help() {
     echo "  pull         Pull all repos"
     echo "  packages     Show package diff"
     echo "  services     Check service status"
-    echo "  system       Update official + AUR packages without prompts"
+    echo "  system       Review and update official + AUR packages in a terminal"
     echo "  full         Pull + packages + services + system update"
     echo "  help         Show this help"
 }
