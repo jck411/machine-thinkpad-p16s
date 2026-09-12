@@ -4,7 +4,7 @@ Telegram Desktop uses the AUR `telegram-desktop-bin` package, which packages
 Telegram's official self-contained binaries and updates through yay. Its package
 declaration lives in `dotfiles_hyprland/packages/base.txt`.
 Launch **Telegram Desktop** from Rofi, sign in with your existing Telegram
-account, then open [Jackshome_bot](https://t.me/Jackshome_bot).
+account, then open [Penelope](https://t.me/assistant_penelope_bot).
 
 The packaged desktop entry supplies launcher and `tg://` integration. Settings
 and authenticated session data stay local in `~/.local/share/TelegramDesktop/`;
