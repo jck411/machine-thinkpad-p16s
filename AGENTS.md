@@ -1,12 +1,13 @@
 # GitHub Copilot Instructions
 
-**→ See [`docs/AI_PLAYBOOK.md`](../docs/AI_PLAYBOOK.md) for full routing, workflows, and implementation details.**
+**→ See [`docs/AI_PLAYBOOK.md`](docs/AI_PLAYBOOK.md) for full routing, workflows, and implementation details.**
 
 Control plane for a ThinkPad P16s Gen 4 AMD running EndeavourOS (Arch) + Hyprland.
 
 ## Hermes routing
 
-Use the browser dashboard for Hermes on VM 114. Requests to change the home
+Use Hermes Desktop as a remote client or the browser dashboard for VM 114.
+Follow [workstation access](docs/hermes.md). Requests to change the home
 agent's settings, profiles, SOUL.md, or tools must operate directly on that VM,
 preserving UI and agent edits. Do not install a laptop agent or generate runtime
 configuration in a repository. PROXMOX retains installation and recovery tooling;
@@ -63,4 +64,4 @@ update.sh        — pull repos, reconcile, optional system upgrade
 ---
 
 **For routing rules, install workflow, Hyprland gotchas, and full guidelines:**
-**→ [`docs/AI_PLAYBOOK.md`](../docs/AI_PLAYBOOK.md)**
+**→ [`docs/AI_PLAYBOOK.md`](docs/AI_PLAYBOOK.md)**
