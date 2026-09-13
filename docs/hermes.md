@@ -14,7 +14,9 @@ at <https://hermes.jackshome.com> through Cloudflare Access.
 Penelope (`default`) and Karen (`homelab_shared`) are profiles on that VM.
 The agent, providers, profiles, conversations, skills, and memory remain there.
 Desktop uses a remote connection; its **This laptop** connection is unconfigured.
-Select the VM connection when managing assistants.
+Desktop keeps that app-managed entry and its local default-profile button visible;
+selecting it can start a local agent installation. Keep **Home Hermes** selected
+when managing assistants, and choose it in **Create on** when adding a profile.
 
 The **Bots** tab provides upstream Bot Mode for existing profiles. Its canonical
 Bot Chats are separate from Telegram conversations. Bot Mode does not merge
