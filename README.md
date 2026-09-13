@@ -97,9 +97,8 @@ This repo **calls** dotfiles scripts. The agent also **edits dotfiles directly**
 
 ## Hermes
 
-Use the browser dashboard for the home agent on VM 114. Settings and personas
-are edited on the VM. See [Hermes access](docs/hermes.md) and
-[server operations](../PROXMOX/docs/hermes.md).
+See the [Hermes runbook](../PROXMOX/docs/hermes.md) for Desktop/browser access,
+profiles, memory, and server operations.
 
 ## Google Drive
 
