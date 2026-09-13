@@ -56,6 +56,9 @@ update.sh        — pull repos, reconcile, optional system upgrade
 
 ## Git
 
+Follow the [shared Git workflow](../PROXMOX/AGENTS.md#shared-git-workflow)
+when collaborating with Hermes on homelab repositories.
+
 - Commit and push after every completed change
 - Imperative, lowercase, no period
 - Push directly to `main`—no branches or PRs
