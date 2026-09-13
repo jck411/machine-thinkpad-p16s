@@ -104,6 +104,10 @@ profiles, memory, and server operations.
 
 Google Drive is mounted at `~/GoogleDrive` through a user `rclone` systemd service tracked in this repo. See [`docs/google-drive.md`](docs/google-drive.md).
 
+## Zoom
+
+See [Zoom](docs/zoom.md) for installation, local settings, and meeting checks.
+
 ## Security
 
 - `secrets/` is gitignored — never committed
