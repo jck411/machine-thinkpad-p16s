@@ -11,7 +11,8 @@ at <http://192.168.1.114:9119>. Sign in with the dashboard account when prompted
 This address requires access to the home network. Browser access remains available
 at <https://hermes.jackshome.com> through Cloudflare Access.
 
-Penelope (`default`) and Karen (`homelab_shared`) are profiles on that VM.
+Penelope (`default`), Karen (`homelab_shared`), and Winston (`jack_personal`)
+are profiles on that VM.
 The agent, providers, profiles, conversations, skills, and memory remain there.
 Desktop uses a remote connection; its **This laptop** connection is unconfigured.
 Desktop keeps that app-managed entry and its local default-profile button visible;
