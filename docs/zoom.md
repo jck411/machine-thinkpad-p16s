@@ -5,7 +5,9 @@ Zoom Workplace is declared as the AUR `zoom` package in
 official Linux binaries. Install and update through the agent using the
 [package review workflow](package-updates.md).
 
-Launch **Zoom Workplace** from the application menu or run `zoom`.
+After installation, press **Super+D** and select **Zoom Workplace**, or run
+`zoom`. The package supplies the desktop entry and meeting-link handlers;
+no custom launcher is needed.
 Account data and app-managed settings stay local; Zoom configuration and data
 are excluded from dotfiles tracking. Meeting audio, video, and screen sharing
 can be checked through [Zoom's test meeting](https://zoom.us/test).
