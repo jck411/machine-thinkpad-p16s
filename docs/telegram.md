@@ -1,9 +1,8 @@
 # Telegram
 
-Telegram Desktop uses the AUR `telegram-desktop-bin` package, which packages
-Telegram's official self-contained binaries and updates through yay. Its package
+Telegram Desktop uses the official Arch `telegram-desktop` package. Its package
 declaration lives in `dotfiles_hyprland/packages/base.txt`.
-Launch **Telegram Desktop** from Rofi, sign in with your existing Telegram
+Launch **Telegram** from Rofi, sign in with your existing Telegram
 account. For the family assistant, follow [Hermes access](../../PROXMOX/docs/hermes.md#access).
 
 The packaged desktop entry supplies launcher and `tg://` integration. Settings
