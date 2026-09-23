@@ -1,13 +1,23 @@
 #!/bin/bash
 
-# Reviewed Arch + AUR update for this machine.
+# Unattended Arch + AUR update for this machine.
 
 set -Eeuo pipefail
 
-if [ "$#" -ne 0 ] || [ ! -t 0 ]; then
-    echo "Run this updater in a terminal, without arguments, for package review." >&2
+if [ "$#" -ne 0 ]; then
+    echo "Run this updater without arguments." >&2
     exit 2
 fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SUDO_COMMAND="$SCRIPT_DIR/update-sudo.sh"
+# Detach from terminal input, including programs that open /dev/tty.
+if [ "$(ps -o sid= -p $$ | tr -d ' ')" != "$$" ]; then
+    exec setsid --wait "$0" "$@" </dev/null
+fi
+exec </dev/null
+export GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -oBatchMode=yes"
+export PAGER=cat GIT_PAGER=cat
 
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/machine-update"
 STATUS_FILE="$STATE_DIR/status"
@@ -122,13 +132,15 @@ echo
 echo "System update started: $STARTED_AT"
 echo "Log: $LOG_FILE"
 
-sudo -v
+"$SUDO_COMMAND" -v
 
 echo
-echo "Review Arch news and every AUR build-file change before proceeding."
-echo "Stop for unexpected sources, install hooks, dependencies, or maintainer changes."
-yay -Syu --confirm --diffmenu --answerdiff All \
-    --noanswerupgrade --noanswerclean --noansweredit --sudo sudo
+echo "Applying official and AUR updates with predefined answers."
+yay -Syu --noconfirm --answerupgrade None \
+    --answerclean None --answerdiff None --answeredit None \
+    --cleanmenu=false --diffmenu=false --editmenu=false \
+    --noremovemake --useask --pgpfetch --mflags --noconfirm \
+    --sudo "$SUDO_COMMAND" --sudoflags '' --sudoloop=false
 
 # Some package-manager cancellation paths exit successfully. Do not reset the
 # reminder until both repository and AUR updates are actually complete.

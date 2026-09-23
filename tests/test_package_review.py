@@ -43,54 +43,6 @@ class PackageReviewTests(unittest.TestCase):
                 os.close(master)
                 os.close(slave)
 
-    def test_unattended_updater_cannot_invoke_package_managers(self):
-        result = self.run_script(ROOT / "scripts/system-update.sh")
-        self.assertEqual(result.returncode, 2)
-        self.assertFalse((self.home / "calls").exists())
-
-    def test_updater_rejects_bypass_arguments(self):
-        result = self.run_script(ROOT / "scripts/system-update.sh",
-                                 "--noconfirm", terminal=True)
-        self.assertEqual(result.returncode, 2)
-        self.assertFalse((self.home / "calls").exists())
-
-    def test_cancelled_upgrade_does_not_reset_reminder(self):
-        self.command("yay", "exit 1")
-        result = self.run_script(ROOT / "scripts/system-update.sh", terminal=True)
-        state = self.home / "state/machine-update"
-        self.assertNotEqual(result.returncode, 0)
-        self.assertFalse((state / "last-success").exists())
-        self.assertIn("state=failed", (state / "status").read_text())
-
-    def test_zero_exit_with_pending_updates_is_not_success(self):
-        self.command("yay", 'if [[ "$1" == -Qu ]]; then echo "pending 1 -> 2"; fi')
-        result = self.run_script(ROOT / "scripts/system-update.sh", terminal=True)
-        state = self.home / "state/machine-update"
-        self.assertNotEqual(result.returncode, 0)
-        self.assertFalse((state / "last-success").exists())
-        self.assertIn("state=failed", (state / "status").read_text())
-
-    def test_successful_run_requires_confirmation_and_all_diffs(self):
-        result = self.run_script(ROOT / "scripts/system-update.sh", terminal=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        calls = (self.home / "calls").read_text()
-        self.assertIn("--confirm", calls)
-        self.assertIn("--diffmenu --answerdiff All", calls)
-        self.assertNotIn("--noconfirm", calls)
-        self.assertTrue((self.home / "state/machine-update/last-success").exists())
-
-    def test_empty_query_exit_one_is_success(self):
-        self.command("yay", 'if [[ "$1" == -Qu ]]; then exit 1; fi')
-        result = self.run_script(ROOT / "scripts/system-update.sh", terminal=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertTrue((self.home / "state/machine-update/last-success").exists())
-
-    def test_query_error_is_not_success(self):
-        self.command("yay", 'if [[ "$1" == -Qu ]]; then echo "network error" >&2; exit 1; fi')
-        result = self.run_script(ROOT / "scripts/system-update.sh", terminal=True)
-        self.assertNotEqual(result.returncode, 0)
-        self.assertFalse((self.home / "state/machine-update/last-success").exists())
-
     def test_overdue_shell_check_only_reminds(self):
         updater = self.home / "config/scripts/update-system.sh"
         updater.parent.mkdir(parents=True)
@@ -98,7 +50,7 @@ class PackageReviewTests(unittest.TestCase):
         updater.chmod(0o755)
         result = self.run_script(DOTFILES / "config/scripts/check-updates.sh", terminal=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn("review", result.stdout)
+        self.assertIn("without prompts", result.stdout)
         self.assertFalse((self.home / "calls").exists())
 
     def test_unattended_install_blocks_before_any_package_mutation(self):

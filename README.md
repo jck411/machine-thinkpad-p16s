@@ -54,10 +54,10 @@ This will:
 ./setup.sh packages         # Just install missing packages
 ./setup.sh configs          # Just link configs
 ./setup.sh services         # Just enable services
-./update.sh system          # Reviewed official + AUR update in a terminal
+./update.sh system          # Unattended official + AUR update
 ```
 
-Follow the [package update workflow](docs/package-updates.md) for review,
+Follow the [package update workflow](docs/package-updates.md) for operation,
 authentication, logs, and validation.
 
 ## Structure
@@ -67,7 +67,7 @@ machine-thinkpad-p16s/
 ├── setup.sh                # Full bootstrap (idempotent)
 ├── update.sh               # Pull + reconcile + optional system update
 ├── scripts/
-│   └── system-update.sh    # Logged, reviewed official + AUR updater
+│   └── system-update.sh    # Logged, unattended official + AUR updater
 ├── system/
 │   ├── services.txt        # systemd units to enable
 │   ├── user-services.txt   # user systemd units to enable

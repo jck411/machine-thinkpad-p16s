@@ -6,6 +6,8 @@
 
 set -e
 
+export GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -oBatchMode=yes"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -168,7 +170,7 @@ show_help() {
     echo "  pull         Pull all repos"
     echo "  packages     Show package diff"
     echo "  services     Check service status"
-    echo "  system       Review and update official + AUR packages in a terminal"
+    echo "  system       Update official + AUR packages without prompts"
     echo "  full         Pull + packages + services + system update"
     echo "  help         Show this help"
 }

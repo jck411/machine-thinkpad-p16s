@@ -1,42 +1,39 @@
 # Package updates
 
-Ask the agent to review and apply updates. `./update.sh system` and
-`~/.config/scripts/update-system.sh` run the same terminal-based updater.
-The weekly shell check only reminds; it never starts an upgrade.
+`./update.sh system` and `~/.config/scripts/update-system.sh` run the same
+unattended official-repository and AUR upgrade. No terminal or answers are needed.
+The weekly shell check only reminds; it does not schedule upgrades.
 
-The updater requires a terminal, forces yay's confirmation prompts, and displays
-all available AUR build-file diffs before building. Package-sync also refuses
-unattended AUR installations. Sudo uses normal authentication; update scripts
-do not read stored passwords. Logs and the last completed-update marker live in
-`~/.local/state/machine-update/`.
+Sudo reads `SUDO_PASSWORD` from this repository's Git-ignored `secrets/.env`,
+which must be owned by the current user with permissions `600`. Each privileged
+invocation authenticates over standard input, including after long builds.
+Credentials are not exported to yay or build processes. Missing or invalid
+credentials fail the update without asking for a password.
 
-## Required review
+## Automatic answers
 
-1. Read [Arch news](https://archlinux.org/news/) and relevant upstream security
-   advisories. Check repository origins, required package signatures, available
-   disk space, and service implications. Do not reboot or disrupt remote access
-   without authorization and a recovery path.
-2. Prefer signed Arch/EndeavourOS packages. For AUR packages, inspect the current
-   maintainer, upstream source, and every changed tracked file, including
-   `PKGBUILD`, patches, launchers, and `.install` hooks. Review new AUR dependencies
-   too. A previously downloaded checkout or empty diff is not proof of review;
-   inspect complete files when the installed/reviewed baseline is unknown.
-3. Review before invoking `makepkg`, sourcing a `PKGBUILD`, or allowing build
-   scripts to execute. Stop on unexplained maintainership changes, obfuscation,
-   unrelated downloads, credential access, or package-manager commands in root
-   install hooks. Validate checksums and upstream signatures where supplied;
-   never disable signature checks to get past an error.
-4. Use yay's review prompts and build as an unprivileged user. Do not use
-   `--noconfirm`, pipe automatic yes answers, or reintroduce stored-password
-   wrappers for AUR operations. Keep dependency lockfiles intact and disable
-   dependency lifecycle scripts when supported; approve necessary build hooks
-   individually. Isolate unfamiliar builds from credentials before running them.
-5. Apply a complete repository upgrade; avoid partial upgrades or indefinite
-   holds on security-sensitive applications. Review any replacements/removals.
-   Resolve `.pacnew` files, required rebuilds, and failed services. Check affected
-   applications and remote-management access. Report a required reboot rather
-   than performing one automatically.
+- Upgrade all eligible packages; exclude none.
+- Reuse build caches; skip clean-build, diff, and editor menus.
+- Accept normal pacman transaction defaults, replacements, and yay-detected
+  package conflicts; choose the default dependency provider.
+- Import AUR-declared source-signing keys; keep checksum and signature checks.
+- Keep build dependencies and orphaned packages.
 
-Yay provides a review opportunity, not malware detection or a security sandbox.
-Signed packages, clean incident-list checks, popularity, and passing tests do not
-guarantee that software is safe. See [Arch's AUR review guidance](https://wiki.archlinux.org/title/Arch_User_Repository#Verify_the_PKGBUILD).
+These settings use [yay 13's unattended options](https://github.com/Jguer/yay/blob/v13.0.1/doc/yay.8).
+AUR updates execute community build scripts without interactive review. Review
+new applications before declaring/installing them through `packages.sh`.
+
+## Failures and completion
+
+The updater disconnects terminal input and disables Git credential prompts.
+Unresolvable conflicts, failed builds, signature errors, or unexpected input
+requirements fail instead of waiting for an answer. It does not force file
+overwrites, disable integrity checks, merge `.pacnew` files, or reboot.
+
+Logs, status, and the last completed-update marker live in
+`~/.local/state/machine-update/`. Concurrent updates are refused. Success is
+recorded only after querying for remaining updates. Postflight checks report
+configuration merges, library rebuilds, orphans, and failed system services.
+Check Arch news and the log when an update fails or reports warnings; rerun after
+resolving the cause. An unattended update is not a guarantee that every future
+package transition can be resolved automatically.
