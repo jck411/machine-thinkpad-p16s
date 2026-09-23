@@ -37,14 +37,14 @@ Complete agent and coding guidelines for this repository.
 > **Always install through the LLM.** Never install packages manually outside this agent — the workflow below ensures package lists, configs, symlinks, and backups all stay in sync.
 
 Follow the [package update workflow](package-updates.md). Routine updates are
-unattended, including AUR builds and their dependencies. Review new applications
-before adding them to package declarations.
+unattended, with all AUR recipe execution isolated through `scripts/aur.sh`.
+Review new applications before adding them to package declarations.
 
 When asked to install or update any app, follow these steps in order:
 
 1. **Verify the app is real** — search online if unfamiliar; never refuse due to unfamiliarity.
 2. **Check if already installed** — `which <app>`, `pacman -Q <pkg>`, check `/opt/`, `~/.local/bin/`, `~/.local/share/applications/`
-3. **Determine install type** — pacman/yay → `yay -S <pkg>`; Python → `uv`. Tarball installs to `/opt/<App>/` are deprecated — prefer AUR/pacman packages when available.
+3. **Determine install type** — official packages → pacman; AUR → `./scripts/aur.sh -S <pkg>`; Python → `uv`. Tarball installs to `/opt/<App>/` are deprecated — prefer AUR/pacman packages when available.
 4. **Compare versions** if already installed — same: confirm before reinstalling; newer: proceed
 5. **Install or update** — confirm before overwriting system paths
 6. **Clean up** — remove old dirs, stale `.desktop` entries

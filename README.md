@@ -67,7 +67,10 @@ machine-thinkpad-p16s/
 ├── setup.sh                # Full bootstrap (idempotent)
 ├── update.sh               # Pull + reconcile + optional system update
 ├── scripts/
-│   └── system-update.sh    # Logged, unattended official + AUR updater
+│   ├── system-update.sh    # Logged, unattended official + AUR updater
+│   ├── aur.sh              # AUR operations with isolated recipe execution
+│   ├── isolated-makepkg.py # Disposable build sandbox
+│   └── update-sudo.sh      # Host-side authentication
 ├── system/
 │   ├── services.txt        # systemd units to enable
 │   ├── user-services.txt   # user systemd units to enable

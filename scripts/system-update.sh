@@ -136,11 +136,10 @@ echo "Log: $LOG_FILE"
 
 echo
 echo "Applying official and AUR updates with predefined answers."
-yay -Syu --noconfirm --answerupgrade None \
+"$SCRIPT_DIR/aur.sh" -Syu --noconfirm --answerupgrade None \
     --answerclean None --answerdiff None --answeredit None \
     --cleanmenu=false --diffmenu=false --editmenu=false \
-    --noremovemake --useask --pgpfetch --mflags --noconfirm \
-    --sudo "$SUDO_COMMAND" --sudoflags '' --sudoloop=false
+    --noremovemake --useask --pgpfetch --mflags --noconfirm
 
 # Some package-manager cancellation paths exit successfully. Do not reset the
 # reminder until both repository and AUR updates are actually complete.
