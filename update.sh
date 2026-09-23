@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # Machine Update — ThinkPad P16s Gen 4
-# Pull latest dotfiles, reconcile packages, restart changed services.
+# Inspect package, config, and service state; pull/upgrade only when requested.
 # Safe to run frequently (e.g., daily or before work sessions).
 
 set -e
+
 
 export GIT_TERMINAL_PROMPT=0 GIT_SSH_COMMAND="ssh -oBatchMode=yes"
 
@@ -36,23 +37,11 @@ print_header() {
 pull_repos() {
     echo -e "${BOLD}${CYAN}[1/4] Pulling repos${NC}"
 
-    # Pull this machine repo
-    if git -C "$MACHINE_DIR" rev-parse --is-inside-work-tree &>/dev/null; then
-        echo -e "  ${BLUE}machine-thinkpad-p16s...${NC}"
-        git -C "$MACHINE_DIR" pull --ff-only 2>/dev/null && \
-            echo -e "  ${GREEN}✓${NC} machine-thinkpad-p16s up to date" || \
-            echo -e "  ${YELLOW}⚠${NC} machine-thinkpad-p16s pull failed (local changes?)"
-    fi
-
-    # Pull dotfiles
-    if [ -d "$DOTFILES_DIR/.git" ]; then
-        echo -e "  ${BLUE}dotfiles_hyprland...${NC}"
-        git -C "$DOTFILES_DIR" pull --ff-only 2>/dev/null && \
-            echo -e "  ${GREEN}✓${NC} dotfiles_hyprland up to date" || \
-            echo -e "  ${YELLOW}⚠${NC} dotfiles_hyprland pull failed (local changes?)"
-    else
-        echo -e "  ${RED}✗${NC} dotfiles_hyprland not found — run setup.sh first"
-    fi
+    local repo
+    for repo in "$MACHINE_DIR" "$DOTFILES_DIR"; do
+        echo "  $(basename "$repo")..."
+        git -C "$repo" pull --ff-only || return 1
+    done
     echo ""
 }
 
@@ -68,16 +57,7 @@ sync_packages() {
         return 1
     fi
 
-    # Show status — don't auto-install
     "$pkg_script" status "$HOST_PROFILE"
-
-    # Check if anything is missing
-    local declared installed missing
-    declared=$("$pkg_script" status "$HOST_PROFILE" 2>/dev/null | grep -c "✗" || true)
-    if [ "$declared" -gt 0 ]; then
-        echo -e "  ${YELLOW}Run './packages.sh install $HOST_PROFILE' in dotfiles to install missing${NC}"
-    fi
-    echo ""
 }
 
 # =========================================================================
@@ -101,55 +81,72 @@ verify_symlinks() {
 check_services() {
     echo -e "${BOLD}${CYAN}[4/4] Systemd services${NC}"
 
-    local services_file="$MACHINE_DIR/system/services.txt"
-    if [ ! -f "$services_file" ]; then
-        echo -e "  ${YELLOW}⚠ No services.txt — skipping${NC}"
-        return 0
-    fi
-
-    local all_ok=1
-    while IFS= read -r service || [[ -n "$service" ]]; do
-        [[ "$service" =~ ^[[:space:]]*# ]] && continue
-        [[ -z "${service// }" ]] && continue
-
-        if systemctl is-enabled "$service" &>/dev/null; then
-            if systemctl is-active "$service" &>/dev/null; then
-                echo -e "  ${GREEN}✓${NC} $service (enabled, running)"
-            else
-                echo -e "  ${YELLOW}⚠${NC} $service (enabled, not running)"
-                all_ok=0
-            fi
-        else
-            echo -e "  ${RED}✗${NC} $service (not enabled)"
-            all_ok=0
+    local scope file service properties key value enabled active result type state
+    local issues=0
+    local -a ctl
+    for scope in system user; do
+        ctl=(systemctl)
+        file="$MACHINE_DIR/system/services.txt"
+        if [ "$scope" = user ]; then
+            ctl+=(--user)
+            file="$MACHINE_DIR/system/user-services.txt"
         fi
-    done < "$services_file"
-
-    local user_services_file="$MACHINE_DIR/system/user-services.txt"
-    if [ -f "$user_services_file" ]; then
+        if [ ! -f "$file" ]; then
+            echo "  Missing service list: $file"
+            issues=1
+            continue
+        fi
         while IFS= read -r service || [[ -n "$service" ]]; do
-            [[ "$service" =~ ^[[:space:]]*# ]] && continue
-            [[ -z "${service// }" ]] && continue
-
-            if systemctl --user is-enabled "$service" &>/dev/null; then
-                if systemctl --user is-active "$service" &>/dev/null; then
-                    echo -e "  ${GREEN}✓${NC} $service (user, enabled, running)"
-                else
-                    echo -e "  ${YELLOW}⚠${NC} $service (user, enabled, not running)"
-                    all_ok=0
-                fi
-            else
-                echo -e "  ${RED}✗${NC} $service (user, not enabled)"
-                all_ok=0
+            [[ "$service" =~ ^[[:space:]]*# || -z "${service// }" ]] && continue
+            enabled= active= result= type= state=
+            if ! properties=$("${ctl[@]}" show "$service" -p UnitFileState -p ActiveState -p Result -p Type -p SubState); then
+                echo "  ✗ $service ($scope, unable to query)"
+                issues=1
+                continue
             fi
-        done < "$user_services_file"
-    fi
-
-    if [ "$all_ok" -eq 0 ]; then
-        echo ""
-        echo -e "  ${YELLOW}Run './setup.sh services' to fix service issues${NC}"
+            while IFS='=' read -r key value; do
+                case "$key" in
+                    UnitFileState) enabled="$value" ;;
+                    ActiveState) active="$value" ;;
+                    Result) result="$value" ;;
+                    Type) type="$value" ;;
+                    SubState) state="$value" ;;
+                esac
+            done <<< "$properties"
+            if [[ "$active" = failed || ( -n "$result" && "$result" != success ) ]]; then
+                echo "  ✗ $service ($scope, $active/$state, result=$result)"
+                issues=1
+            elif [[ "$enabled" != enabled && "$enabled" != enabled-runtime ]]; then
+                echo "  ✗ $service ($scope, ${enabled:-not installed}, $active/$state)"
+                issues=1
+            elif [[ "$active" = active ]]; then
+                echo "  ✓ $service ($scope, $enabled, $active/$state)"
+            elif [[ "$active" = inactive && ( "$type" = oneshot || "$service" = NetworkManager-dispatcher.service ) ]]; then
+                echo "  ✓ $service ($scope, $enabled, inactive; boot/on-demand unit, no recorded failure)"
+            else
+                echo "  ⚠ $service ($scope, $enabled, $active/$state)"
+                issues=1
+            fi
+        done < "$file"
+    done
+    if [ "$issues" -ne 0 ]; then
+        echo "Inspect flagged units with systemctl [--user] status UNIT and journalctl."
+        echo "setup.sh services enables declared units; it does not repair runtime failures."
     fi
     echo ""
+    return "$issues"
+}
+
+check_status() {
+    local issues=0
+    sync_packages || issues=1
+    verify_symlinks || issues=1
+    check_services || issues=1
+    if [ "$issues" -ne 0 ]; then
+        echo "⚠ Status check found issues; review the findings above."
+        return 1
+    fi
+    echo "✓ Status checks passed; undeclared packages and unmanaged configs are informational."
 }
 
 # =========================================================================
@@ -180,11 +177,10 @@ main() {
 
     case "${1:-status}" in
         status)
-            pull_repos
-            sync_packages
-            verify_symlinks
-            check_services
-            echo -e "${GREEN}${BOLD}✓ Status check complete${NC}"
+            echo "[1/4] Local repository status (no fetch or pull)"
+            git -C "$MACHINE_DIR" status --short --branch
+            git -C "$DOTFILES_DIR" status --short --branch
+            check_status
             ;;
         pull)
             pull_repos
@@ -200,10 +196,8 @@ main() {
             ;;
         full)
             pull_repos
-            sync_packages
-            verify_symlinks
-            check_services
             system_update
+            check_status
             echo -e "${GREEN}${BOLD}✓ Full update complete${NC}"
             ;;
         help|--help|-h)

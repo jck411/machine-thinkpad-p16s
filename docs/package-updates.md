@@ -4,6 +4,22 @@
 unattended official-repository and AUR upgrade. No terminal or answers are needed.
 The weekly shell check only reminds; it does not schedule upgrades.
 
+## Status checks
+
+`./update.sh status` is read-only and does not fetch or pull repositories.
+`pull` explicitly fast-forwards both repositories; `full` pulls, upgrades, then
+checks the resulting state. Pull failures stop the operation. Status exits
+nonzero for missing declarations, incorrect config links, or service issues;
+undeclared explicit packages and unmanaged configs are informational.
+Package and config comparison rules live in the
+[dotfiles maintenance guide](../../dotfiles_hyprland/README.md#package-management).
+
+Service checks report actual systemd states, accept idle boot/on-demand units,
+and flag recorded failures. Inactivity alone does not prove a boot task ran.
+Smart-card support is enabled through `pcscd.socket`; `pcscd.service` may exit
+when idle. `setup.sh services` enables declared units for future activation;
+it does not repair runtime failures or start every enabled unit.
+
 ## Build isolation
 
 All repository-managed AUR operations use `scripts/aur.sh`, including new

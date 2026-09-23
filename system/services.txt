@@ -40,7 +40,7 @@ avahi-daemon.service
 cronie.service
 
 # Smart card reader
-pcscd.service
+pcscd.socket
 
 # SSD TRIM (weekly timer for NVMe Gen4)
 fstrim.timer

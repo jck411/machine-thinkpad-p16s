@@ -40,7 +40,7 @@ This will:
 
 ### Check status
 ```bash
-./update.sh                 # Pull repos, check packages/services
+./update.sh                 # Read-only local package/config/service checks
 ```
 
 ### Full update (pull + system upgrade)

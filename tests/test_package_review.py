@@ -57,7 +57,7 @@ class PackageReviewTests(unittest.TestCase):
         shutil.copy(DOTFILES / "packages.sh", self.home / "packages.sh")
         (self.home / "packages").mkdir()
         (self.home / "packages/base.txt").write_text("untrusted-aur-fixture\n")
-        self.command("pacman", '[[ "$1" == -Qqe ]]')
+        self.command("pacman", '[[ "$1" == -Qq ]]')
         self.env["NONINTERACTIVE"] = "1"
         result = self.run_script(self.home / "packages.sh", "install", "base")
         self.assertEqual(result.returncode, 2)
