@@ -9,8 +9,8 @@ polling. Left-click refreshes and opens the Codex usage dashboard; right-click
 refreshes only. Both use Waybar signal 10 (`pkill -x -RTMIN+10 waybar`). Each
 invocation fetches fresh account data, without a cache-age delay.
 
-Hover shows a snapshot of reset countdowns, local reset dates, and the last
-successful refresh. Values and countdowns remain unchanged until the next
+Hover shows only remaining allowance, reset countdown/date, and last refresh
+time, plus an error when stale. Values and countdowns remain unchanged until the next
 refresh. Data comes from the authenticated Codex app server's
 [`account/rateLimits/read`](https://learn.chatgpt.com/docs/app-server#6-rate-limits-chatgpt)
 method. Windows are identified by reported duration, not primary/secondary
