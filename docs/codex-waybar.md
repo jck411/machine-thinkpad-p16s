@@ -7,9 +7,11 @@ Only windows actually returned by OpenAI appear; when multiple windows are
 available, `5h` and `W` labels distinguish them. Hover identifies each window.
 
 The module refreshes once when Waybar starts and on clicks, with no periodic
-polling. Left-click refreshes and opens the Codex usage dashboard; right-click
-refreshes only. Both use Waybar signal 10 (`pkill -x -RTMIN+10 waybar`). Each
-invocation fetches fresh account data, without a cache-age delay.
+polling. Both the OpenAI and OpenRouter widgets use the same clicks in laptop
+and docked layouts: left-click refreshes and opens the corresponding website
+(Codex usage dashboard or OpenRouter logs); right-click refreshes only.
+Codex uses Waybar signal 10 (`pkill -x -RTMIN+10 waybar`); OpenRouter uses signal 9.
+Each invocation fetches fresh account data, without a cache-age delay.
 
 Hover shows only remaining allowance, reset countdown/date, and last refresh
 time, plus an error when stale. Values and countdowns remain unchanged until the next
