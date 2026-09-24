@@ -1,21 +1,26 @@
 # Codex allowance in Waybar
 
-The laptop and docked bars show Codex's **remaining** 5-hour (`5h`) and weekly
-(`W`) allowance beside OpenRouter. Hover for reset countdowns, local reset dates,
-and the last successful refresh; click to open the Codex usage dashboard.
+The laptop and docked bars show Codex's **remaining** allowance beside
+OpenRouter, for example `Codex W: 95%` for the weekly window. Only windows actually
+returned by OpenAI appear; the unavailable 5-hour window is omitted.
 
-The module polls every 120 seconds through the authenticated Codex app server's
+The module refreshes once when Waybar starts and on clicks, with no periodic
+polling. Left-click refreshes and opens the Codex usage dashboard; right-click
+refreshes only. Both use Waybar signal 10 (`pkill -x -RTMIN+10 waybar`). Each
+invocation fetches fresh account data, without a cache-age delay.
+
+Hover shows a snapshot of reset countdowns, local reset dates, and the last
+successful refresh. Values and countdowns remain unchanged until the next
+refresh. Data comes from the authenticated Codex app server's
 [`account/rateLimits/read`](https://learn.chatgpt.com/docs/app-server#6-rate-limits-chatgpt)
-method. Windows are identified by their reported duration, not primary/secondary
-position. A window omitted by OpenAI displays `—`; it does not mean 100% remains.
-The Pro account currently returns only the weekly window. No model turns are
-started, and API billing keys are not used.
+method. Windows are identified by reported duration, not primary/secondary
+position. No model turns are started, and API billing keys are not used.
 
 Below 25% remaining the text turns amber; below 10% it turns red. Desktop alerts
 fire once per threshold per reset window, including after restarting the bar.
-Polling alerts require Waybar to be running. A failed refresh preserves the last
-values in gray with `⟳` and a stale tooltip. Passing a reset time also marks the
-values stale until a successful fetch supplies a new window.
+Alerts are evaluated only when refreshing. A failed refresh preserves the last
+values in gray with `⟳` and a stale tooltip. If a refresh returns a window whose
+reset time has already passed, its values are also marked stale.
 
 ## Dependencies and state
 
