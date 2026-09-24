@@ -60,6 +60,8 @@ This will:
 Follow the [package update workflow](docs/package-updates.md) for operation,
 authentication, logs, and validation.
 
+Codex subscription monitoring: [Waybar allowance meter](docs/codex-waybar.md).
+
 ## Structure
 
 ```
