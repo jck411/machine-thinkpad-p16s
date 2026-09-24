@@ -15,8 +15,16 @@ and docked layouts: left-click refreshes and opens the corresponding website
 Codex uses Waybar signal 10 (`pkill -x -RTMIN+10 waybar`); OpenRouter uses signal 9.
 Each invocation fetches fresh account data, without a cache-age delay.
 
-Hover shows only remaining allowance, reset countdown/date, and last refresh
-time, plus an error when stale. Values and countdowns remain unchanged until the next
+Hover shows remaining allowance, reset countdown/date, last refresh time, and
+`Today's percent used: X% (target 14%)`. The daily line turns Nord red above 14%
+of the full weekly allowance; this is a pacing target, not an OpenAI daily limit.
+Tracking starts at the first successful weekly-quota refresh each local calendar
+day, persists across bar restarts, and measures changes on subsequent refreshes.
+The tooltip shows the tracking start time: earlier daily use and usage missed
+across a weekly reset cannot be reconstructed. A weekly reset preserves observed
+use earlier that day and adds usage in the new weekly window. Missing daily data
+shows `—`; a failed refresh preserves the last measurement with a stale warning.
+Values and countdowns remain unchanged until the next
 refresh. Data comes from the authenticated Codex app server's
 [`account/rateLimits/read`](https://learn.chatgpt.com/docs/app-server#6-rate-limits-chatgpt)
 method. Windows are identified by reported duration, not primary/secondary
@@ -37,8 +45,9 @@ It uses the existing `~/.local/bin/uv`, Python's standard library, `notify-send`
 bundled executable in the local stable/Insiders OpenAI VS Code extensions.
 No new service, Python dependency, or credential copy is required.
 
-`state/codex-usage.json` caches only allowance windows, refresh time, and alert
-thresholds; `state/codex-usage.lock` coordinates concurrent bar instances.
+`state/codex-usage.json` caches allowance windows, refresh time, alert thresholds,
+and the daily measurement. Existing caches gain the daily field on the next
+successful refresh. `state/codex-usage.lock` coordinates concurrent bar instances.
 Both are already Git-ignored. Authentication remains managed by Codex.
 
 ## Validation and recovery
