@@ -1,8 +1,10 @@
 # Codex allowance in Waybar
 
 The laptop and docked bars show Codex's **remaining** allowance beside
-OpenRouter, for example `Codex W: 95%` for the weekly window. Only windows actually
-returned by OpenAI appear; the unavailable 5-hour window is omitted.
+OpenRouter, with an OpenAI icon followed by the percentage (for example `95%`
+for a weekly-only allowance). The icon is bundled from the OpenAI IDE extension.
+Only windows actually returned by OpenAI appear; when multiple windows are
+available, `5h` and `W` labels distinguish them. Hover identifies each window.
 
 The module refreshes once when Waybar starts and on clicks, with no periodic
 polling. Left-click refreshes and opens the Codex usage dashboard; right-click
