@@ -3,6 +3,8 @@
 The laptop and docked bars show Codex's **remaining** allowance beside
 OpenRouter, with an OpenAI icon followed by the percentage (for example `95%`
 for a weekly-only allowance). The icon is bundled from the OpenAI IDE extension.
+Both usage widgets share one CSS rule for 14px icons, spacing, and status colors;
+their SVGs use the same Nord foreground color.
 Only windows actually returned by OpenAI appear; when multiple windows are
 available, `5h` and `W` labels distinguish them. Hover identifies each window.
 
