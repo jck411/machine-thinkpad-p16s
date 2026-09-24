@@ -15,11 +15,9 @@ and docked layouts: left-click refreshes and opens the corresponding website
 Codex uses Waybar signal 10 (`pkill -x -RTMIN+10 waybar`); OpenRouter uses signal 9.
 Each invocation fetches fresh account data, without a cache-age delay.
 
-Hover shows remaining allowance, reset countdown/date, last refresh time, and
-`Available: X%/day`: weekly percentage remaining divided by the fractional days
-until reset. This line turns red below 14%/day and is omitted when weekly data is
-missing or stale. No daily usage tracking is stored. Values and countdowns stay
-unchanged until the next
+Hover shows remaining allowance (`Weekly`), reset countdown/date (`Resets`),
+and last refresh time (`Updated`), plus an error when stale. Values and
+countdowns remain unchanged until the next
 refresh. Data comes from the authenticated Codex app server's
 [`account/rateLimits/read`](https://learn.chatgpt.com/docs/app-server#6-rate-limits-chatgpt)
 method. Windows are identified by reported duration, not primary/secondary
