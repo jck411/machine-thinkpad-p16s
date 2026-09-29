@@ -28,7 +28,7 @@ instead of invoking yay or makepkg directly when building packages.
 
 The runner uses yay 13's `--makepkg` setting to execute **every** makepkg call
 through `isolated-makepkg.py`, including metadata queries, source preparation,
-verification, build, and packaging. Bubblewrap 0.12 creates disposable mount,
+verification, build, and packaging. Bubblewrap 0.13 creates disposable mount,
 user, PID, IPC, and network namespaces. Builds get:
 
 - A fresh home and environment, with no host credentials, SSH/GPG agents,
@@ -41,7 +41,12 @@ user, PID, IPC, and network namespaces. Builds get:
 - Outbound networking through slirp4netns 1.3.5, with host loopback forwarding
   disabled. Host networking configuration is unchanged. This is not an outbound
   firewall: Internet and LAN destinations remain reachable for downloads.
+  Networking starts after namespace setup, using the network namespace's owning
+  user namespace. Recipes wait until networking is ready; setup failure stops them.
 - No capabilities or privilege elevation. Sudo cannot work inside the build.
+- Fakeroot records package ownership without changing host file owners
+  (`FAKEROOTDONTTRYCHOWN=1`). This lets GNU tar and bsdtar extract archives with
+  root or service owners inside the namespace, which maps only the builder UID.
 
 Missing isolation tools or failed sandbox setup stop the operation; there is
 no unsandboxed fallback. Dependencies and completed packages are installed by
@@ -81,5 +86,5 @@ recorded only after querying for remaining updates. Postflight checks report
 configuration merges, library rebuilds, orphans, and failed system services.
 
 Implementation references: [yay 13.0.1](https://github.com/Jguer/yay/blob/v13.0.1/pkg/settings/exe/cmd_builder.go),
-[Bubblewrap 0.12](https://github.com/containers/bubblewrap/blob/v0.12.0/README.md),
+[Bubblewrap 0.13](https://github.com/containers/bubblewrap/blob/v0.13.0/README.md),
 and [slirp4netns](https://github.com/rootless-containers/slirp4netns/blob/v1.3.5/slirp4netns.1.md).

@@ -1,5 +1,6 @@
 """Real namespace tests: no root, no package installation, no private data reads."""
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -7,7 +8,9 @@ import pwd
 import shutil
 import socket
 import subprocess
+import tarfile
 import tempfile
+import time
 import unittest
 from unittest import mock
 
@@ -119,6 +122,35 @@ CHECK
         self.assertIn('usr/share/isolation-fixture/data', contents)
         self.assertFalse(Path('/usr/share/isolation-fixture').exists())
 
+    def test_extracts_archive_ownership_without_changing_host_owner(self):
+        with tarfile.open(self.work / 'source.tar', 'w') as archive:
+            for name, uid, gid in [('root-owned', 0, 0), ('service-owned', 123, 456)]:
+                entry = tarfile.TarInfo(name)
+                entry.uid, entry.gid, entry.size = uid, gid, 7
+                archive.addfile(entry, io.BytesIO(b'fixture'))
+        self.base = self.base[:self.base.index('package()')] + '''
+package() {
+    for tool in tar bsdtar; do
+        mkdir -p "$pkgdir/usr/share/$tool"
+        "$tool" -xf "$startdir/source.tar" -C "$pkgdir/usr/share/$tool"
+        [ "$(stat -c '%u:%g' "$pkgdir/usr/share/$tool/root-owned")" = 0:0 ]
+        [ "$(stat -c '%u:%g' "$pkgdir/usr/share/$tool/service-owned")" = 123:456 ]
+    done
+}
+'''
+        result = self.run_recipe('', '--noconfirm', '--force')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        archive = self.work / 'isolation-fixture-1-1-any.pkg.tar.zst'
+        unpacked = subprocess.check_output(['bsdtar', '-cf', '-', '--format=ustar',
+                                           '@' + str(archive)])
+        with tarfile.open(fileobj=io.BytesIO(unpacked)) as package:
+            for tool in ('tar', 'bsdtar'):
+                for name, uid, gid in [('root-owned', 0, 0), ('service-owned', 123, 456)]:
+                    member = package.getmember(f'usr/share/{tool}/{name}')
+                    self.assertEqual((member.uid, member.gid), (uid, gid))
+                    host = self.work / 'pkg/isolation-fixture/usr/share' / tool / name
+                    self.assertEqual(host.stat().st_uid, os.getuid())
+
     def test_symlinked_git_rejected(self):
         (self.work / '.git').symlink_to(self.host.name)
         result = self.run_recipe()
@@ -167,6 +199,33 @@ gpg --batch --verify message.sig message || exit 95
             with self.assertRaisesRegex(RuntimeError, 'Sandbox setup failed'):
                 module.run(['--printsrcinfo'])
         self.assertFalse((self.work / 'sandbox-bypassed').exists())
+
+    def test_network_startup_after_namespace_setup(self):
+        spec = importlib.util.spec_from_file_location('isolated_makepkg', WRAPPER)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.recipe.write_text('touch recipe-ran\n' + self.base)
+        original_popen = subprocess.Popen
+        for fail in (False, True):
+            with self.subTest(network_failure=fail):
+                (self.work / 'recipe-ran').unlink(missing_ok=True)
+
+                def delayed_network(command, **kwargs):
+                    if command[0] == '/usr/bin/slirp4netns':
+                        # Previously slirp raced bwrap's nested userns setup.
+                        time.sleep(0.2)
+                        if fail:
+                            command = ['/usr/bin/false']
+                    return original_popen(command, **kwargs)
+
+                with mock.patch.object(module.Path, 'cwd', return_value=self.work), \
+                     mock.patch.object(module.subprocess, 'Popen', side_effect=delayed_network):
+                    if fail:
+                        with self.assertRaisesRegex(RuntimeError, 'Sandbox network setup failed'):
+                            module.run(['--printsrcinfo'])
+                    else:
+                        self.assertEqual(module.run(['--printsrcinfo']), 0)
+                self.assertEqual((self.work / 'recipe-ran').exists(), not fail)
 
     def test_runner_rejects_boundary_overrides(self):
         for option in ('--makepkg=/bin/false', '--builddir=/tmp', '--makepkgconf',

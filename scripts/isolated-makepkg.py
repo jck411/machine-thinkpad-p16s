@@ -1,5 +1,6 @@
 #!/usr/bin/python3 -I
 """Run every makepkg operation inside a disposable, unprivileged sandbox."""
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -59,9 +60,11 @@ def run(arguments):
             (temp / name).write_bytes(content)
         info_r, info_w = os.pipe()
         gate_r, gate_w = os.pipe()
+        setup_r, setup_w = os.pipe()
         ready_r, ready_w = os.pipe()
         exit_r, exit_w = os.pipe()
-        descriptors.extend((info_r, info_w, gate_r, gate_w, ready_r, ready_w, exit_r, exit_w))
+        descriptors.extend((info_r, info_w, gate_r, gate_w, setup_r, setup_w,
+                            ready_r, ready_w, exit_r, exit_w))
         command = [
             '/usr/bin/bwrap', '--unshare-all', '--unshare-user', '--die-with-parent', '--new-session',
             '--uid', '1000', '--gid', '1000', '--cap-drop', 'ALL', '--disable-userns',
@@ -73,7 +76,7 @@ def run(arguments):
             '--dir', '/run', '--dir', '/home/builder',
             '--ro-bind', '/var/lib/pacman', '/var/lib/pacman',
             '--bind', str(work), str(work), '--chdir', str(work),
-            '--info-fd', str(info_w), '--block-fd', str(gate_r),
+            '--info-fd', str(info_w),
         ]
         # Only public system configuration needed by compilers, TLS, and pacman.
         for name in ('makepkg.conf', 'makepkg.conf.d', 'pacman.conf',
@@ -96,10 +99,20 @@ def run(arguments):
             'GNUPGHOME': '/home/builder/.gnupg', 'GIT_TERMINAL_PROMPT': '0',
             'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': '/dev/null',
             'GIT_SSH_COMMAND': 'ssh -oBatchMode=yes', 'PAGER': 'cat',
+            # Only the builder UID is mapped. Record package ownership in
+            # fakeroot without real chown calls to unmapped IDs (EINVAL).
+            'FAKEROOTDONTTRYCHOWN': '1',
         }.items():
             command.extend(('--setenv', key, value))
-        command.extend(('--', '/bin/bash', '-c', '''
+        # Signal only after bwrap has finished namespace/loopback setup. Keep
+        # recipes blocked until slirp is ready, then close both inherited FDs.
+        command.extend(('--', '/bin/bash', '-c', f'''
 set -e
+printf 1 >&{setup_w}
+exec {setup_w}>&-
+IFS= read -r -n 1 -u {gate_r}
+exec {gate_r}<&-
+''' + '''
 mkdir -m 700 "$GNUPGHOME"
 if [ -s /public-keys ]; then
     gpg --batch --import /public-keys >/dev/null 2>&1
@@ -108,10 +121,12 @@ exec /usr/bin/makepkg "$@"
 ''', 'isolated-makepkg', *arguments))
         try:
             sandbox = subprocess.Popen(command, env=ENV, stdin=subprocess.DEVNULL,
-                                       pass_fds=(info_w, gate_r))
+                                       pass_fds=(info_w, gate_r, setup_w))
             os.close(info_w)
             descriptors.remove(info_w)
-            # bwrap emits one JSON object before waiting on --block-fd.
+            os.close(setup_w)
+            descriptors.remove(setup_w)
+            # bwrap emits the child PID before setup completes.
             if not select.select([info_r], [], [], 20)[0]:
                 raise RuntimeError('Sandbox setup timed out')
             info = b''
@@ -128,13 +143,22 @@ exec /usr/bin/makepkg "$@"
                     continue
             if child_pid is None:
                 raise RuntimeError('Sandbox setup failed')
+            read_ready(setup_r)
+            # --disable-userns creates a nested user namespace. The network
+            # belongs to its parent, so use NS_GET_USERNS rather than racing
+            # slirp against bwrap's switch to the inner user namespace.
+            net_fd = os.open(f'/proc/{child_pid}/ns/net', os.O_RDONLY)
+            descriptors.append(net_fd)
+            user_fd = fcntl.ioctl(net_fd, 0xb701)  # NS_GET_USERNS, linux/nsfs.h
+            descriptors.append(user_fd)
             network = subprocess.Popen([
                 '/usr/bin/slirp4netns', '--configure', '--disable-host-loopback',
                 '--enable-seccomp',
                 '--ready-fd', str(ready_w), '--exit-fd', str(exit_r),
-                str(child_pid), 'tap0',
+                '--netns-type=path', f'--userns-path=/proc/self/fd/{user_fd}',
+                f'/proc/self/fd/{net_fd}', 'tap0',
             ], env=ENV, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                pass_fds=(ready_w, exit_r))
+                pass_fds=(ready_w, exit_r, net_fd, user_fd))
             os.close(ready_w)
             descriptors.remove(ready_w)
             read_ready(ready_r)
