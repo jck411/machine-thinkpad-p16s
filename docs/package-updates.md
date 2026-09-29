@@ -4,6 +4,10 @@
 unattended official-repository and AUR upgrade. No terminal or answers are needed.
 The weekly shell check only reminds; it does not schedule upgrades.
 
+Hermes Desktop stays installed but is excluded from routine upgrades and their
+completion check. Update it separately through the
+[Hermes runbook](../../PROXMOX/docs/hermes.md#desktop-access).
+
 ## Status checks
 
 `./update.sh status` is read-only and does not fetch or pull repositories.

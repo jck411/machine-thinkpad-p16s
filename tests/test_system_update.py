@@ -34,7 +34,9 @@ printf '%s\\n' "$@" > "$XDG_STATE_HOME/args"
 exit "${UPGRADE_EXIT:-0}"
 ''')
         self.command('yay', '''
-[ "${PENDING:-0}" = 0 ] || echo 'pending-package 1 -> 2'
+[ "$1" = -Quq ] || exit 90
+[ "${PENDING_HERMES:-0}" = 0 ] || echo 'hermes-agent-desktop'
+[ "${PENDING:-0}" = 0 ] || echo 'pending-package'
 exit "${QUERY_EXIT:-1}"
 ''')
         for name in ('pacdiff', 'checkrebuild', 'systemctl'):
@@ -66,13 +68,27 @@ exit "${QUERY_EXIT:-1}"
                      '--diffmenu=false', '--editmenu=false'):
             self.assertIn(flag, args)
         self.assertEqual(args[args.index('--answerupgrade') + 1], 'None')
+        self.assertEqual(args[args.index('--ignore') + 1], 'hermes-agent-desktop')
 
     def test_auth_failure_does_not_start_upgrade(self):
         self.assert_failed(self.run_update(AUTH_EXIT='1'))
         self.assertFalse((self.state.parent / 'args').exists())
 
     def test_query_diagnostic_is_failure(self):
-        self.command('yay', 'if [ "$1" = -Qu ]; then echo "network error" >&2; exit 1; fi')
+        self.command('yay', 'echo "hermes-agent-desktop: network error" >&2; exit 1')
+        self.assert_failed(self.run_update())
+
+    def test_pending_hermes_does_not_block_completion(self):
+        result = self.run_update(PENDING_HERMES='1', QUERY_EXIT='0')
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn('state=success', (self.state / 'status').read_text())
+        self.assertNotEqual(self.marker.read_text(), '123\n')
+
+    def test_pending_hermes_does_not_hide_other_updates(self):
+        self.assert_failed(self.run_update(PENDING_HERMES='1', PENDING='1', QUERY_EXIT='0'))
+
+    def test_similarly_named_package_is_not_excluded(self):
+        self.command('yay', 'echo hermes-agent-desktop-bin')
         self.assert_failed(self.run_update())
 
     def test_arguments_rejected(self):

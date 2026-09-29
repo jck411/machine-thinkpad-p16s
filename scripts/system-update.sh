@@ -11,6 +11,8 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SUDO_COMMAND="$SCRIPT_DIR/update-sudo.sh"
+# Hermes Desktop is updated separately through the PROXMOX runbook.
+MANUAL_UPDATE_PACKAGE=hermes-agent-desktop
 # Detach from terminal input, including programs that open /dev/tty.
 if [ "$(ps -o sid= -p $$ | tr -d ' ')" != "$$" ]; then
     exec setsid --wait "$0" "$@" </dev/null
@@ -136,15 +138,20 @@ echo "Log: $LOG_FILE"
 
 echo
 echo "Applying official and AUR updates with predefined answers."
-"$SCRIPT_DIR/aur.sh" -Syu --noconfirm --answerupgrade None \
+echo "Skipping $MANUAL_UPDATE_PACKAGE; update it separately."
+"$SCRIPT_DIR/aur.sh" -Syu --ignore "$MANUAL_UPDATE_PACKAGE" --noconfirm --answerupgrade None \
     --answerclean None --answerdiff None --answeredit None \
     --cleanmenu=false --diffmenu=false --editmenu=false \
     --noremovemake --useask --pgpfetch --mflags --noconfirm
 
 # Some package-manager cancellation paths exit successfully. Do not reset the
-# reminder until both repository and AUR updates are actually complete.
+# reminder until all automatically managed updates are actually complete.
 QUERY_STATUS=0
-PENDING_UPDATES="$(yay -Qu 2>&1)" || QUERY_STATUS=$?
+PENDING_UPDATES="$(yay -Quq 2>&1)" || QUERY_STATUS=$?
+# Query mode still lists held AUR releases. Match only the exact package name
+# in quiet output, preserving other pending packages and all diagnostics.
+PENDING_UPDATES="$(printf '%s\n' "$PENDING_UPDATES" |
+    awk -v manual="$MANUAL_UPDATE_PACKAGE" '$0 != manual')"
 # Like pacman -Qu, yay returns 1 for an empty result. Diagnostics or other
 # failures must still prevent the update from being recorded as complete.
 if [ -n "$PENDING_UPDATES" ] || [ "$QUERY_STATUS" -gt 1 ]; then
